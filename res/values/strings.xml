@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_go_home">Home</string>
     <string name="menu_open_in_browser">Open in external browser</string>
+    <string name="title_activity_sessions">Sessions</string>
 
 </resources>

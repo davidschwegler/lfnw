@@ -33,6 +33,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appenjoyment.lfnw.MainActivity" />
         </activity>
+        <activity
+            android:name="com.appenjoyment.lfnw.SessionsActivity"
+            android:label="@string/title_activity_sessions"
+            android:parentActivityName="com.appenjoyment.lfnw.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appenjoyment.lfnw.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -34,8 +34,7 @@ public class MainActivity extends Activity
 			@Override
 			public void onClick(View v)
 			{
-				startActivity(new Intent(MainActivity.this, WebViewActivity.class).
-						putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/2013/schedule/sessions"));
+				startActivity(new Intent(MainActivity.this, SessionsActivity.class));
 			}
 		});
 		findViewById(R.id.main_venue).setOnClickListener(new OnClickListener()
