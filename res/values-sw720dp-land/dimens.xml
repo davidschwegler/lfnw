@@ -6,4 +6,8 @@
     -->
     <dimen name="activity_horizontal_margin">128dp</dimen>
 
+    <dimen name="list_activity_horizontal_margin">128dp</dimen>
+    <dimen name="list_activity_vertical_margin">128dp</dimen>
+    <dimen name="list_activity_item_horizontal_margin">0dp</dimen>
+    
 </resources>
