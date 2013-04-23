@@ -5,10 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -20,6 +25,7 @@ import com.appenjoyment.utility.ArrayUtility;
 
 public class SessionsActivity extends ActionBarActivity
 {
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -57,97 +63,85 @@ public class SessionsActivity extends ActionBarActivity
 		}
 
 		List<SessionData> sessionData = json == null ? new ArrayList<SessionData>() : SessionData.parseFromJson(json);
-		final List<SessionModel> sessions = new ArrayList<SessionModel>();
-		for (SessionData data : sessionData)
-			sessions.add(new SessionModel(data));
 
-		listView.setAdapter(new BaseAdapter()
+		SessionsManager.getInstance(this).insertOrUpdate(sessionData);
+
+		// final List<SessionModel> sessions = new ArrayList<SessionModel>();
+		// for (SessionData data : sessionData)
+		// sessions.add(new SessionModel(data));
+
+		Date now = new Date();
+		Cursor cursor = SessionsManager.getInstance(this).getAllSessionsOnDay(2013 - 1900, 4 - 1, 28);
+
+		// TODO: use a loader, rather than all this deprecated stuff!
+		listView.setAdapter(new CursorAdapter(this, cursor)
 		{
 			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
+			public View newView(Context context, final Cursor cursor, ViewGroup parent)
 			{
-				ViewHolder viewHolder;
-				if (convertView != null)
-				{
-					viewHolder = (ViewHolder) convertView.getTag();
-				}
-				else
-				{
-					final View newView = getLayoutInflater().inflate(R.layout.session_list_item, null);
-					convertView = newView;
+				final View view = getLayoutInflater().inflate(R.layout.session_list_item, null);
 
-					viewHolder = new ViewHolder();
-					viewHolder.title = (TextView) newView.findViewById(R.id.session_title);
-					viewHolder.subtitle = (TextView) newView.findViewById(R.id.session_subtitle);
-					viewHolder.star = (CheckBox) newView.findViewById(R.id.session_star);
+				final ViewHolder viewHolder = new ViewHolder();
+				viewHolder.title = (TextView) view.findViewById(R.id.session_title);
+				viewHolder.subtitle = (TextView) view.findViewById(R.id.session_subtitle);
+				viewHolder.star = (CheckBox) view.findViewById(R.id.session_star);
 
-					viewHolder.star.setOnCheckedChangeListener(new OnCheckedChangeListener()
+				viewHolder.star.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View view)
 					{
-						@Override
-						public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-						{
-							ViewHolder viewHolder = (ViewHolder) newView.getTag();
-							viewHolder.session.setStarred(isChecked);
-						}
-					});
+						SessionsManager.getInstance(SessionsActivity.this).starSession(viewHolder.rowId, viewHolder.star.isChecked());
+						cursor.requery();
+					}
+				});
 
-					newView.setTag(viewHolder);
-				}
+				view.setTag(viewHolder);
 
-				SessionModel session = sessions.get(position);
-				viewHolder.session = session;
-				viewHolder.title.setText(session.getSessionData().title);
+				bindView(view, context, cursor);
+
+				return view;
+			}
+
+			@Override
+			public void bindView(View view, Context context, Cursor cursor)
+			{
+				ViewHolder viewHolder = (ViewHolder) view.getTag();
+
+				viewHolder.rowId = cursor.getLong(cursor.getColumnIndex(SessionsManager.Sessions._ID));
+				viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_TITLE)));
 
 				StringBuilder subtitle = new StringBuilder();
-				if (session.getSessionData().speakers.length != 0)
-					subtitle.append(ArrayUtility.join(", ", Arrays.asList(session.getSessionData().speakers)));
+				subtitle.append(cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_SPEAKERS)));
 
-				if (!TextUtils.isEmpty(session.getSessionData().experienceLevel))
+				String experienceLevel = cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_EXPERIENCE_LEVEL));
+				if (!TextUtils.isEmpty(experienceLevel))
 				{
 					if (subtitle.length() != 0)
 						subtitle.append(" | ");
 
-					subtitle.append(session.getSessionData().experienceLevel);
+					subtitle.append(experienceLevel);
 				}
 
-				if (!TextUtils.isEmpty(session.getSessionData().track))
+				String track = cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_TRACK));
+				if (!TextUtils.isEmpty(track))
 				{
 					if (subtitle.length() != 0)
 						subtitle.append(" | ");
 
-					subtitle.append(session.getSessionData().track);
+					subtitle.append(track);
 				}
 				viewHolder.subtitle.setText(subtitle);
 
-				viewHolder.star.setChecked(session.isStarred());
-
-				return convertView;
-			}
-
-			@Override
-			public long getItemId(int position)
-			{
-				return position;
-			}
-
-			@Override
-			public Object getItem(int position)
-			{
-				return sessions.get(position);
-			}
-
-			@Override
-			public int getCount()
-			{
-				return sessions.size();
+				viewHolder.star.setChecked(cursor.getInt(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_STARRED)) != 0);
 			}
 
 			final class ViewHolder
 			{
+				public long rowId;
 				public CheckBox star;
 				public TextView title;
 				public TextView subtitle;
-				public SessionModel session;
 			}
 		});
 	}

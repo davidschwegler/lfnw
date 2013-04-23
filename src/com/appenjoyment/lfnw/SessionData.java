@@ -1,11 +1,16 @@
 package com.appenjoyment.lfnw;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.util.Log;
+import android.util.Pair;
 
 /**
  * E.g.
@@ -33,6 +38,71 @@ public class SessionData
 	public String[] speakers;
 	public String experienceLevel;
 	public String track;
+
+	// e.g. "Saturday, April 27, 2013 - 15:00 to 16:00"
+	// TODO: Timezone is always PST
+	@SuppressWarnings("deprecation")
+	public Pair<Date, Date> parseTimeSlotDateRange()
+	{
+		Date startTime = null;
+		Date endTime = null;
+
+		if (timeSlot == null)
+			return null;
+
+		String[] dayAndTimes = timeSlot.split("-");
+		if (dayAndTimes.length != 2)
+			return null;
+
+		String dayString = dayAndTimes[0].trim();
+
+		// HH:mm:ss z
+		SimpleDateFormat dateFormater = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
+		Date parsedDay;
+		try
+		{
+			parsedDay = dateFormater.parse(dayString);
+		}
+		catch (ParseException e)
+		{
+			return null;
+		}
+
+		if (parsedDay == null)
+			return null;
+
+		String[] timeStartEnd = dayAndTimes[1].split(" to ");
+		if (timeStartEnd.length != 2)
+			return null;
+
+		String startTimeString = timeStartEnd[0].trim();
+		SimpleDateFormat timeFormater = new SimpleDateFormat("HH:mm", Locale.US);
+		Date parsedStartTime;
+		try
+		{
+			parsedStartTime = timeFormater.parse(startTimeString);
+		}
+		catch (ParseException e)
+		{
+			return null;
+		}
+
+		String endTimeString = timeStartEnd[1].trim();
+		Date parsedEndTime;
+		try
+		{
+			parsedEndTime = timeFormater.parse(endTimeString);
+		}
+		catch (ParseException e)
+		{
+			return null;
+		}
+
+		startTime = new Date(parsedDay.getYear(), parsedDay.getMonth(), parsedDay.getDate(), parsedStartTime.getHours(), parsedStartTime.getMinutes());
+		endTime = new Date(parsedDay.getYear(), parsedDay.getMonth(), parsedDay.getDate(), parsedEndTime.getHours(), parsedEndTime.getMinutes());
+
+		return new Pair<Date, Date>(startTime, endTime);
+	}
 
 	public static List<SessionData> parseFromJson(String in)
 	{
