@@ -49,6 +49,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appenjoyment.lfnw.MainActivity" />
         </activity>
+        <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
     </application>
 
 </manifest>

@@ -2,8 +2,10 @@ package com.appenjoyment.lfnw;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,6 +25,18 @@ public class SessionsListFragment extends Fragment
 	public static final String ARG_DATE = "date";
 
 	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+
+		m_updateSessionsReceiver = new UpdateSessionsReceiver();
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(SessionsManager.UPDATED_SESSIONS_ACTION);
+		getActivity().registerReceiver(m_updateSessionsReceiver, filter);
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View rootView = inflater.inflate(R.layout.session_list, container, false);
@@ -34,6 +48,13 @@ public class SessionsListFragment extends Fragment
 		listView.setAdapter(new SessionsAdapter(getActivity(), cursor));
 
 		return rootView;
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		getActivity().unregisterReceiver(m_updateSessionsReceiver);
 	}
 
 	// TODO: use a loader, rather than all this deprecated stuff!
@@ -164,6 +185,21 @@ public class SessionsListFragment extends Fragment
 			public TextView title;
 			public TextView subtitle;
 		}
-
 	}
+
+	private final class UpdateSessionsReceiver extends BroadcastReceiver
+	{
+		@SuppressWarnings("deprecation")
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
+			{
+				StickyListHeadersListView listView = (StickyListHeadersListView) getView().findViewById(R.id.sessions_listview);
+				((CursorAdapter) listView.getAdapter()).getCursor().requery();
+			}
+		}
+	}
+
+	private UpdateSessionsReceiver m_updateSessionsReceiver;
 }

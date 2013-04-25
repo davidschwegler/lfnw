@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -19,6 +20,11 @@ import com.appenjoyment.utility.ArrayUtility;
  */
 public final class SessionsManager
 {
+	/**
+	 * Broadcast action indicating the session list has been updated, and clients should reload their lists (i.e. excluding star toggles).
+	 */
+	public static final String UPDATED_SESSIONS_ACTION = SessionsManager.class.getCanonicalName() + ".UPDATED_SESSIONS";
+
 	/**
 	 * The contract for querying the database.
 	 */
@@ -55,7 +61,10 @@ public final class SessionsManager
 	public synchronized static SessionsManager getInstance(Context context)
 	{
 		if (s_instance == null)
-			s_instance = new SessionsManager(context.getApplicationContext());
+		{
+			s_applicationContext = context.getApplicationContext();
+			s_instance = new SessionsManager(s_applicationContext);
+		}
 
 		return s_instance;
 	}
@@ -153,6 +162,7 @@ public final class SessionsManager
 	{
 		SQLiteDatabase db = m_dbHelper.getWritableDatabase();
 		db.beginTransaction();
+		boolean processedAny = false;
 		try
 		{
 			for (SessionData session : sessions)
@@ -190,6 +200,8 @@ public final class SessionsManager
 					db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[] { String.valueOf(rowId) });
 				else
 					db.insert(Sessions.TABLE_NAME, null, values);
+
+				processedAny = true;
 			}
 
 			db.setTransactionSuccessful();
@@ -198,6 +210,9 @@ public final class SessionsManager
 		{
 			db.endTransaction();
 		}
+
+		if (processedAny)
+			s_applicationContext.sendBroadcast(new Intent(UPDATED_SESSIONS_ACTION));
 	}
 
 	private SessionsManager(Context context)
@@ -242,6 +257,7 @@ public final class SessionsManager
 
 	private static final String TAG = "SessionsManager";
 	private static SessionsManager s_instance;
+	private static Context s_applicationContext;
 
 	private final SessionsDatabase m_dbHelper;
 }
