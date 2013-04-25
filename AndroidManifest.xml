@@ -35,6 +35,7 @@
         </activity>
         <activity
             android:name="com.appenjoyment.lfnw.SessionsActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:label="@string/title_activity_sessions"
             android:parentActivityName="com.appenjoyment.lfnw.MainActivity" >
             <meta-data
@@ -43,6 +44,7 @@
         </activity>
         <activity
             android:name="com.appenjoyment.lfnw.AboutActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:label="@string/title_activity_about"
             android:parentActivityName="com.appenjoyment.lfnw.MainActivity" >
             <meta-data
