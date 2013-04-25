@@ -3,6 +3,7 @@ package com.appenjoyment.lfnw;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -62,6 +63,14 @@ public class MainActivity extends Activity
 			{
 				startActivity(new Intent(MainActivity.this, WebViewActivity.class).
 						putExtra(WebViewActivity.KEY_URL, "http://www.linuxfestnorthwest.org/node/2977/cod_registration"));
+			}
+		});
+		findViewById(R.id.main_about).setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				startActivity(new Intent(MainActivity.this, AboutActivity.class));
 			}
 		});
 	}
