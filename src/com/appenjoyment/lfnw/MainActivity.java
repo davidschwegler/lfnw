@@ -69,7 +69,7 @@ public class MainActivity extends Activity
 	public void onActivityResult(int requestCode, int resultCode, Intent intent)
 	{
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		if (scanResult != null)
+		if (scanResult != null && !TextUtils.isEmpty(scanResult.getContents()))
 		{
 			VCard vcard = Ezvcard.parse(scanResult.getContents()).first();
 			if (vcard != null)
