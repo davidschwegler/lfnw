@@ -2,28 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/site_background_header_translucent"
     android:orientation="horizontal"
-    android:background="#DDCCCCCC"
+    android:paddingBottom="4dp"
     android:paddingLeft="8dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp" >
+    android:paddingTop="4dp" >
 
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textStyle="bold"
+        android:text="Test"
         android:textSize="16sp"
-        android:text="Test" />
+        android:textStyle="bold" />
 
-<!--     <Button
+    <!--
+         <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
         android:text="@string/hello_world"
         android:focusable="false"
         android:layout_marginLeft="10dp"
-        android:layout_gravity="center_vertical"/> -->
+        android:layout_gravity="center_vertical"/>
+    -->
 
 </LinearLayout>

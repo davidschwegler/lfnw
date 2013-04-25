@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="site_background">#FF76A5BA</color>
+    <color name="site_background_header_translucent">#DD76A5BA</color>
+    <color name="site_background_dark">#FF3D6983</color>
+</resources>

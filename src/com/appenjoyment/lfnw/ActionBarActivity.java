@@ -1,13 +1,13 @@
 package com.appenjoyment.lfnw;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
-public abstract class ActionBarActivity extends Activity
+public abstract class ActionBarActivity extends FragmentActivity
 {
 	@Override
 	protected void onCreate(Bundle savedInstanceState)

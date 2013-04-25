@@ -1,5 +1,6 @@
 package com.appenjoyment.lfnw;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -60,24 +61,43 @@ public final class SessionsManager
 	}
 
 	/**
-	 * Returns all sessions sorted by date.
+	 * Returns the days of all sessions, sorted by date
 	 */
-	public Cursor getAllSessions()
+	@SuppressWarnings("deprecation")
+	public List<Date> getSessionDays()
 	{
-		return query(false, Sessions.TABLE_NAME, ALL_SESSIONS_ROWS, null, null, null, null, Sessions.COLUMN_NAME_START_TIME + ", "
-				+ Sessions.COLUMN_NAME_END_TIME, null);
+		// get all the session start times (small list)
+		Cursor cursor = query(true, Sessions.TABLE_NAME,
+				new String[] { Sessions.COLUMN_NAME_START_TIME }, null, null,
+				Sessions.COLUMN_NAME_START_TIME, null,
+				Sessions.COLUMN_NAME_START_TIME, null);
+
+		// aggregate the dates based on day (way to do this in sqlite? using string functions?)
+		List<Date> dates = new ArrayList<Date>();
+		Date lastDate = null;
+		while (cursor.moveToNext())
+		{
+			Date date = new Date(cursor.getLong(0));
+			if (lastDate == null || date.getDate() != lastDate.getDate())
+			{
+				lastDate = date;
+				dates.add(date);
+			}
+		}
+
+		cursor.close();
+
+		return dates;
 	}
 
 	/**
 	 * Returns all sessions on this date, sorted by date, then by title
-	 * 
-	 * @see Date#Date(int, int, int)
 	 */
 	@SuppressWarnings("deprecation")
-	public Cursor getAllSessionsOnDay(int year, int month, int day)
+	public Cursor getAllSessionsOnDay(Date day)
 	{
-		long timeMidnightAM = new Date(year, month, day).getTime();
-		long timeMidnightPM = new Date(year, month, day + 1).getTime();
+		long timeMidnightAM = new Date(day.getYear(), day.getMonth(), day.getDate()).getTime();
+		long timeMidnightPM = new Date(day.getYear(), day.getMonth(), day.getDate() + 1).getTime();
 
 		// all sessions which start before midnight tonight and end after midnight this morning, ordered by the start time then the end time
 		return query(false, Sessions.TABLE_NAME, ALL_SESSIONS_ROWS, Sessions.COLUMN_NAME_START_TIME + " < ? AND " + Sessions.COLUMN_NAME_END_TIME + " > ?",
@@ -164,6 +184,7 @@ public final class SessionsManager
 						new String[] { session.nodeId }, null, null, null);
 				if (cursorExisting.moveToFirst())
 					rowId = cursorExisting.getLong(0);
+				cursorExisting.close();
 
 				if (rowId != null)
 					db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[] { String.valueOf(rowId) });
