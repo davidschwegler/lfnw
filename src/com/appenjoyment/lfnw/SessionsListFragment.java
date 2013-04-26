@@ -116,6 +116,15 @@ public class SessionsListFragment extends Fragment
 			StringBuilder subtitle = new StringBuilder();
 			subtitle.append(cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_SPEAKERS)));
 
+			String room = cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_ROOM));
+			if (!TextUtils.isEmpty(room))
+			{
+				if (subtitle.length() != 0)
+					subtitle.append(" | ");
+
+				subtitle.append(getString(R.string.sessions_room_prefix) + " " + room);
+			}
+
 			String experienceLevel = cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_EXPERIENCE_LEVEL));
 			if (!TextUtils.isEmpty(experienceLevel))
 			{
