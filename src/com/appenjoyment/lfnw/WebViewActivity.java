@@ -35,6 +35,7 @@ public class WebViewActivity extends ActionBarActivity
 
 		m_webView.setWebViewClient(new WebViewClient()
 		{
+			@Override
 			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 			{
 				// TODO:!

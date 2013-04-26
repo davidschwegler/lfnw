@@ -75,6 +75,7 @@ public class MainActivity extends Activity
 		});
 	}
 
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent)
 	{
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
