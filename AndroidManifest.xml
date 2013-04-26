@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.appenjoyment.lfnw"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.1.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -51,7 +51,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appenjoyment.lfnw.MainActivity" />
         </activity>
-        <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
+        <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
     </application>
 
 </manifest>
