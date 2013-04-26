@@ -30,7 +30,7 @@ public class SessionsListFragment extends Fragment
 		super.onCreate(savedInstanceState);
 
 		m_updateSessionsReceiver = new UpdateSessionsReceiver();
-		
+
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(SessionsManager.UPDATED_SESSIONS_ACTION);
 		getActivity().registerReceiver(m_updateSessionsReceiver, filter);
@@ -45,7 +45,8 @@ public class SessionsListFragment extends Fragment
 		listView.setEmptyView(rootView.findViewById(R.id.sessions_list_empty));
 
 		Cursor cursor = SessionsManager.getInstance(getActivity()).getAllSessionsOnDay(new Date(getArguments().getLong(ARG_DATE)));
-		listView.setAdapter(new SessionsAdapter(getActivity(), cursor));
+		m_adapter = new SessionsAdapter(getActivity(), cursor);
+		listView.setAdapter(m_adapter);
 
 		return rootView;
 	}
@@ -194,12 +195,10 @@ public class SessionsListFragment extends Fragment
 		public void onReceive(Context context, Intent intent)
 		{
 			if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
-			{
-				StickyListHeadersListView listView = (StickyListHeadersListView) getView().findViewById(R.id.sessions_listview);
-				((CursorAdapter) listView.getAdapter()).getCursor().requery();
-			}
+				m_adapter.getCursor().requery();
 		}
 	}
 
 	private UpdateSessionsReceiver m_updateSessionsReceiver;
+	private SessionsAdapter m_adapter;
 }
