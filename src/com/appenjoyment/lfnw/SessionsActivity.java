@@ -1,10 +1,6 @@
 package com.appenjoyment.lfnw;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import android.content.BroadcastReceiver;
@@ -34,44 +30,6 @@ public class SessionsActivity extends ActionBarActivity
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.sessions);
-
-		// temp code to load temp sessions file
-		InputStream stream = null;
-		ByteArrayOutputStream stringOutput = null;
-		String json = null;
-		try
-		{
-			stream = getAssets().open("sessions.json");
-			stringOutput = new ByteArrayOutputStream();
-			byte[] bytes = new byte[8192];
-			while (stream.read(bytes) != -1)
-				stringOutput.write(bytes);
-			json = stringOutput.toString("utf-8");
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				stringOutput.close();
-			}
-			catch (IOException e)
-			{
-			}
-			try
-			{
-				stream.close();
-			}
-			catch (IOException e)
-			{
-			}
-		}
-
-		List<SessionData> sessionData = json == null ? new ArrayList<SessionData>() : SessionData.parseFromJson(json);
-		SessionsManager.getInstance(this).insertOrUpdate(sessionData);
 
 		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getSupportFragmentManager());
 		mViewPager = (ViewPager) findViewById(R.id.sessions_pager);

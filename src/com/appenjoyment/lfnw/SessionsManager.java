@@ -1,5 +1,8 @@
 package com.appenjoyment.lfnw;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -160,7 +163,11 @@ public final class SessionsManager
 	 */
 	public void insertOrUpdate(List<SessionData> sessions)
 	{
-		SQLiteDatabase db = m_dbHelper.getWritableDatabase();
+		insertOrUpdate(m_dbHelper.getWritableDatabase(), sessions);
+	}
+
+	private void insertOrUpdate(SQLiteDatabase db, List<SessionData> sessions)
+	{
 		db.beginTransaction();
 		boolean processedAny = false;
 		try
@@ -215,6 +222,57 @@ public final class SessionsManager
 			s_applicationContext.sendBroadcast(new Intent(UPDATED_SESSIONS_ACTION));
 	}
 
+	// TODO: where would be a better place to do this kind of initialization?
+	private void insertInitialData(SQLiteDatabase db)
+	{
+		Log.i(TAG, "Inserting initial sessions list");
+
+		// temp code to load temp sessions file
+		InputStream stream = null;
+		ByteArrayOutputStream stringOutput = null;
+		String json = null;
+		try
+		{
+			if (BuildConfig.DEBUG && DEBUG_TEST_SESSIONS)
+				stream = s_applicationContext.getAssets().open("sessions_test_one_day.json");
+			else
+				stream = s_applicationContext.getAssets().open("sessions.json");
+
+			stringOutput = new ByteArrayOutputStream();
+			byte[] bytes = new byte[8192];
+			while (stream.read(bytes) != -1)
+				stringOutput.write(bytes);
+			json = stringOutput.toString("utf-8");
+		}
+		catch (IOException e)
+		{
+			Log.w(TAG, "Couldn't load embedded json", e);
+		}
+		finally
+		{
+			try
+			{
+				if (stringOutput != null)
+					stringOutput.close();
+			}
+			catch (IOException e)
+			{
+			}
+			try
+			{
+				if (stream != null)
+					stream.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
+
+		List<SessionData> sessionData = json == null ? new ArrayList<SessionData>() : SessionData.parseFromJson(json);
+		if (sessionData != null)
+			insertOrUpdate(db, sessionData);
+	}
+
 	private SessionsManager(Context context)
 	{
 		m_dbHelper = new SessionsDatabase(context);
@@ -245,17 +303,19 @@ public final class SessionsManager
 					+ Sessions.COLUMN_NAME_TRACK + " TEXT,"
 					+ Sessions.COLUMN_NAME_STARRED + " INTEGER"
 					+ ");");
+
+			insertInitialData(db);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 		{
-			db.execSQL("DROP TABLE IF EXISTS " + Sessions.TABLE_NAME);
-			onCreate(db);
+			// version 1 -- nothing to upgrade yet!
 		}
 	}
 
 	private static final String TAG = "SessionsManager";
+	private static boolean DEBUG_TEST_SESSIONS = false;
 	private static SessionsManager s_instance;
 	private static Context s_applicationContext;
 

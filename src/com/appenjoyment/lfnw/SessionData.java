@@ -106,10 +106,10 @@ public class SessionData
 
 	public static List<SessionData> parseFromJson(String in)
 	{
-		List<SessionData> sessions = new ArrayList<SessionData>();
-
 		try
 		{
+			List<SessionData> sessions = new ArrayList<SessionData>();
+
 			// list of sessions
 			JSONArray sessionsArray = new JSONArray(in);
 			for (int index = 0; index < sessionsArray.length(); index++)
@@ -118,13 +118,16 @@ public class SessionData
 				JSONObject sessionObject = (JSONObject) sessionsArray.get(index);
 				sessions.add(parseSession(sessionObject));
 			}
+
+			return sessions;
 		}
 		catch (JSONException e)
 		{
+			// all-or-nothing for now...could be more lenient and skip failing sessions,
+			// but that could also lead to "dropping" a certain session and never knowing it
 			Log.e(TAG, "Error parsing Sessions Json", e);
+			return null;
 		}
-
-		return sessions;
 	}
 
 	private static SessionData parseSession(JSONObject sessionObject) throws JSONException
