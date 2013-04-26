@@ -3,7 +3,7 @@ package com.appenjoyment.lfnw;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -172,7 +172,7 @@ public class SessionsActivity extends ActionBarActivity
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-			return SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(m_days.get(position));
+			return DateFormat.getDateInstance(DateFormat.MEDIUM).format(m_days.get(position));
 		}
 
 		private List<Date> m_days;
@@ -180,12 +180,14 @@ public class SessionsActivity extends ActionBarActivity
 
 	private final class UpdateSessionsServiceConnection implements ServiceConnection
 	{
+		@Override
 		public void onServiceConnected(ComponentName className, IBinder service)
 		{
 			m_boundUpdateSessionsService = ((UpdateSessionsService.UpdateSessionsBinder) service).getService();
 			setProgressBarIndeterminateVisibility(m_boundUpdateSessionsService.isUpdating());
 		}
 
+		@Override
 		public void onServiceDisconnected(ComponentName className)
 		{
 			// should never happen

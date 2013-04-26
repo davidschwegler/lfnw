@@ -1,6 +1,6 @@
 package com.appenjoyment.lfnw;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -156,7 +156,7 @@ public class SessionsListFragment extends Fragment
 			if (getCursor().moveToPosition(position))
 			{
 				Date startTime = new Date(getCursor().getLong(getCursor().getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_START_TIME)));
-				headerText = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(startTime);
+				headerText = DateFormat.getTimeInstance(DateFormat.SHORT).format(startTime);
 			}
 
 			holder.text.setText(headerText);

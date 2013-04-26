@@ -1,22 +1,12 @@
 package com.appenjoyment.lfnw;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.List;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 public class UpdateSessionsService extends Service
 {
