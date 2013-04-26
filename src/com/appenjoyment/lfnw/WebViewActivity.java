@@ -55,7 +55,8 @@ public class WebViewActivity extends ActionBarActivity
 			}
 		});
 
-		m_requestedUrl = getIntent().getExtras().getString(KEY_URL);
+		Bundle extras = getIntent().getExtras();
+		m_requestedUrl = extras == null ? null : extras.getString(KEY_URL);
 		if (m_requestedUrl == null || m_requestedUrl.length() == 0)
 			throw new IllegalArgumentException("No Url");
 
