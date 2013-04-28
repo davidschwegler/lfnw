@@ -1,1 +1,1 @@
-adb shell monkey -p com.appenjoyment.lfnw -v 50000
+adb shell monkey -p com.appenjoyment.lfnw -v 100

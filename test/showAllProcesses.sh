@@ -1,0 +1,1 @@
+adb -e shell ps 
