@@ -48,7 +48,8 @@ public class AboutActivity extends ActionBarActivity
 			@Override
 			public void onClick(View v)
 			{
-				String subject = getString(R.string.support_email_subject_prefix) + ": " + getString(R.string.app_name) + " " + packageInfoFinal.versionName;
+				String subject = getString(R.string.support_email_subject_prefix) + ": " + getString(R.string.app_name) + 
+						" " + packageInfoFinal.versionName;
 				String body = "\n\n----\nVersion: " + packageInfoFinal.versionName +
 						"\nVersion Code: " + packageInfoFinal.versionCode +
 						"\n" + android.os.Build.MANUFACTURER + " | " + android.os.Build.MODEL + " | " + android.os.Build.BOARD;

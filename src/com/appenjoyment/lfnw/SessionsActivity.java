@@ -47,7 +47,8 @@ public class SessionsActivity extends ActionBarActivity
 
 		// tell the update sessions service that now would be a good time to update the sessions if it hasn't in a while
 		// calling startService() explicitly, rather than just bind(), also ensures the service lives on beyond the bound life
-		startService(new Intent(this, UpdateSessionsService.class).putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_INTERVAL));
+		startService(new Intent(this, UpdateSessionsService.class).
+				putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_INTERVAL));
 	}
 
 	@Override

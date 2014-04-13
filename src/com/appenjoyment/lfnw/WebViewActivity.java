@@ -80,8 +80,8 @@ public class WebViewActivity extends ActionBarActivity
 			return true;
 		case R.id.menu_open_in_browser:
 			String currentUrl = m_webView.getUrl();
-			startActivity(new Intent(Intent.ACTION_VIEW,
-					Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl)));
+			Uri uri = Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl); 
+			startActivity(new Intent(Intent.ACTION_VIEW, uri));
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
