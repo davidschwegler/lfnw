@@ -80,9 +80,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_scan_contact_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="Scan Badge" />
                         </RelativeLayout>
@@ -100,9 +102,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_sessions_calendar_blank_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="Sessions" />
                         </RelativeLayout>
@@ -127,9 +131,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_venue_place_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="Venue" />
                         </RelativeLayout>
@@ -148,9 +154,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_sponsors_heart_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="Sponsors" />
                         </RelativeLayout>
@@ -175,9 +183,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_register_nametag_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="Register" />
                         </RelativeLayout>
@@ -196,9 +206,11 @@
 
                             <ImageView
                                 style="@style/MainButtonImageStyle"
+                                android:layout_above="@+id/mainButtonImageCaption"
                                 android:src="@drawable/ic_about_info_xl" />
 
                             <TextView
+                                android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
                                 android:text="About" />
                         </RelativeLayout>
