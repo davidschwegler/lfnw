@@ -28,6 +28,9 @@ public final class VCardContactUtility
 		// note: 4.0-4.0.2 has the bug with no workaround
 		intentInsertEdit.putExtra("finishActivityOnSaveCompleted", true);
 
+		// TODO: handle other names -- get a sample badge so we can get all this info!!!
+		// eg. http://zxing.appspot.com/generator/ uses N which Ezvcard is parsing as "family name"
+		
 		// name
 		if (vcard.getFormattedName() != null)
 			intentInsertEdit.putExtra(ContactsContract.Intents.Insert.NAME, vcard.getFormattedName().getValue());
