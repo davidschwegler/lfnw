@@ -25,14 +25,14 @@ public class MainFragment extends Fragment
 				scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
 			}
 		});
-		view.findViewById(R.id.main_sessions).setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				startActivity(new Intent(getActivity(), SessionsActivity.class));
-			}
-		});
+//		view.findViewById(R.id.main_sessions).setOnClickListener(new OnClickListener()
+//		{
+//			@Override
+//			public void onClick(View v)
+//			{
+//				startActivity(new Intent(getActivity(), SessionsActivity.class));
+//			}
+//		});
 		view.findViewById(R.id.main_venue).setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -60,15 +60,15 @@ public class MainFragment extends Fragment
 						putExtra(WebViewActivity.KEY_URL, "http://www.linuxfestnorthwest.org/node/2977/cod_registration"));
 			}
 		});
-		view.findViewById(R.id.main_about).setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				startActivity(new Intent(getActivity(), AboutActivity.class));
-			}
-		});
-		
+//		view.findViewById(R.id.main_about).setOnClickListener(new OnClickListener()
+//		{
+//			@Override
+//			public void onClick(View v)
+//			{
+//				startActivity(new Intent(getActivity(), AboutActivity.class));
+//			}
+//		});
+//		
 		return view;
 	}
 

@@ -41,15 +41,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appenjoyment.lfnw.MainActivity" />
         </activity>
-        <activity
-            android:name="com.appenjoyment.lfnw.AboutActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:label="@string/about_title"
-            android:parentActivityName="com.appenjoyment.lfnw.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.appenjoyment.lfnw.MainActivity" />
-        </activity>
         <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
     </application>
 

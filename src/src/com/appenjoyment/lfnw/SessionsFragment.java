@@ -15,26 +15,38 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
+import android.view.View;
+import android.view.ViewGroup;
 
-public class SessionsActivity extends ActionBarActivity
+public class SessionsFragment extends Fragment
 {
-	@Override
-	protected void onCreate(Bundle savedInstanceState)
+	public static SessionsFragment newInstance()
 	{
-		getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setProgressBarIndeterminate(true);
+		return new SessionsFragment();
+	}
 
-		super.onCreate(savedInstanceState);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		View view = inflater.inflate(R.layout.sessions, container, false);
+		setHasOptionsMenu(true);
 
-		setContentView(R.layout.sessions);
+		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+		m_swipeRefreshLayout.setColorScheme(
+				R.color.swipe_refresh_progress_1,
+				R.color.swipe_refresh_progress_2,
+				R.color.swipe_refresh_progress_3,
+				R.color.swipe_refresh_progress_4);
+		m_swipeRefreshLayout.setEnabled(false);
 
-		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getSupportFragmentManager());
-		mViewPager = (ViewPager) findViewById(R.id.sessions_pager);
-		mViewPager.setAdapter(m_sessionsListPagerAdapter);
+		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getChildFragmentManager());
+		m_viewPager = (ViewPager) view.findViewById(R.id.sessions_pager);
+		m_viewPager.setAdapter(m_sessionsListPagerAdapter);
 
 		m_updateSessionsReceiver = new UpdateSessionsReceiver();
 		m_updateSessionsServiceConnection = new UpdateSessionsServiceConnection();
@@ -44,42 +56,43 @@ public class SessionsActivity extends ActionBarActivity
 		filter.addAction(UpdateSessionsService.UPDATE_STARTED_ACTION);
 		filter.addAction(UpdateSessionsService.UPDATE_COMPLETED_ACTION);
 		filter.addAction(SessionsManager.UPDATED_SESSIONS_ACTION);
-		registerReceiver(m_updateSessionsReceiver, filter);
+		getActivity().registerReceiver(m_updateSessionsReceiver, filter);
 
 		// tell the update sessions service that now would be a good time to update the sessions if it hasn't in a while
 		// calling startService() explicitly, rather than just bind(), also ensures the service lives on beyond the bound life
-		startService(new Intent(this, UpdateSessionsService.class).
+		getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class).
 				putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_INTERVAL));
+
+		return view;
 	}
 
 	@Override
-	protected void onResume()
+	public void onResume()
 	{
 		super.onResume();
 
 		// TODO: onResume? onCreate?
-		bindService(new Intent(this, UpdateSessionsService.class), m_updateSessionsServiceConnection, Context.BIND_AUTO_CREATE);
+		getActivity().bindService(new Intent(getActivity(), UpdateSessionsService.class), m_updateSessionsServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
-	protected void onPause()
+	public void onPause()
 	{
 		super.onPause();
-		unbindService(m_updateSessionsServiceConnection);
+		getActivity().unbindService(m_updateSessionsServiceConnection);
 	}
 
 	@Override
-	protected void onDestroy()
+	public void onDestroyView()
 	{
 		super.onDestroy();
-		unregisterReceiver(m_updateSessionsReceiver);
+		getActivity().unregisterReceiver(m_updateSessionsReceiver);
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
-		getMenuInflater().inflate(R.menu.sessions, menu);
-		return true;
+		inflater.inflate(R.menu.sessions, menu);
 	}
 
 	@Override
@@ -88,7 +101,7 @@ public class SessionsActivity extends ActionBarActivity
 		switch (item.getItemId())
 		{
 		case R.id.sessions_menu_refresh:
-			startService(new Intent(this, UpdateSessionsService.class)
+			getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
 					.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED));
 			return true;
 		}
@@ -101,13 +114,13 @@ public class SessionsActivity extends ActionBarActivity
 		{
 			super(fm);
 
-			m_days = SessionsManager.getInstance(SessionsActivity.this).getSessionDays();
+			m_days = SessionsManager.getInstance(getActivity()).getSessionDays();
 		}
 
 		@Override
 		public void notifyDataSetChanged()
 		{
-			m_days = SessionsManager.getInstance(SessionsActivity.this).getSessionDays();
+			m_days = SessionsManager.getInstance(getActivity()).getSessionDays();
 
 			super.notifyDataSetChanged();
 		}
@@ -143,7 +156,7 @@ public class SessionsActivity extends ActionBarActivity
 		public void onServiceConnected(ComponentName className, IBinder service)
 		{
 			m_boundUpdateSessionsService = ((UpdateSessionsService.UpdateSessionsBinder) service).getService();
-			setProgressBarIndeterminateVisibility(m_boundUpdateSessionsService.isUpdating());
+			m_swipeRefreshLayout.setRefreshing(m_boundUpdateSessionsService.isUpdating());
 		}
 
 		public void onServiceDisconnected(ComponentName className)
@@ -159,9 +172,9 @@ public class SessionsActivity extends ActionBarActivity
 		public void onReceive(Context context, Intent intent)
 		{
 			if (intent.getAction().equals(UpdateSessionsService.UPDATE_STARTED_ACTION))
-				setProgressBarIndeterminateVisibility(true);
+				m_swipeRefreshLayout.setRefreshing(true);
 			else if (intent.getAction().equals(UpdateSessionsService.UPDATE_COMPLETED_ACTION))
-				setProgressBarIndeterminateVisibility(false);
+				m_swipeRefreshLayout.setRefreshing(false);
 			else if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
 				m_sessionsListPagerAdapter.notifyDataSetChanged();
 		}
@@ -171,5 +184,6 @@ public class SessionsActivity extends ActionBarActivity
 	private ServiceConnection m_updateSessionsServiceConnection;
 	private BroadcastReceiver m_updateSessionsReceiver;
 	private SessionsListPagerAdapter m_sessionsListPagerAdapter;
-	private ViewPager mViewPager;
+	private ViewPager m_viewPager;
+	private SwipeRefreshLayout m_swipeRefreshLayout;
 }

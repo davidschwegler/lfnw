@@ -37,32 +37,12 @@ public class MainActivity extends ActionBarActivity
 	public MainActivity()
 	{
 		List<MainFeatureInfo> features = new ArrayList<MainFeatureInfo>();
-		for (MainFeature feature : MainFeature.values())
-		{
-			switch (feature)
-			{
-			case About:
-				features.add(new MainFeatureInfo(feature, R.string.about_title, R.drawable.ic_about_info));
-				break;
-			case Register:
-				features.add(new MainFeatureInfo(feature, R.string.register_title, R.drawable.ic_register_nametag));
-				break;
-			case Scan:
-				features.add(new MainFeatureInfo(feature, R.string.scan_badge_title, R.drawable.ic_scan_contact));
-				break;
-			case Sessions:
-				features.add(new MainFeatureInfo(feature, R.string.sessions_title, R.drawable.ic_sessions_calendar_blank));
-				break;
-			case Sponsors:
-				features.add(new MainFeatureInfo(feature, R.string.sponsors_title, R.drawable.ic_sponsors_heart));
-				break;
-			case Venue:
-				features.add(new MainFeatureInfo(feature, R.string.venue_title, R.drawable.ic_venue_place));
-				break;
-			default:
-				throw new IllegalArgumentException(feature.toString());
-			}
-		}
+		features.add(new MainFeatureInfo(MainFeature.Sessions, R.string.sessions_title, R.drawable.ic_sessions_calendar_blank));
+		features.add(new MainFeatureInfo(MainFeature.Scan, R.string.scan_badge_title, R.drawable.ic_scan_contact));
+		features.add(new MainFeatureInfo(MainFeature.Venue, R.string.venue_title, R.drawable.ic_venue_place));
+		features.add(new MainFeatureInfo(MainFeature.Sponsors, R.string.sponsors_title, R.drawable.ic_sponsors_heart));
+		features.add(new MainFeatureInfo(MainFeature.Register, R.string.register_title, R.drawable.ic_register_nametag));
+		features.add(new MainFeatureInfo(MainFeature.About, R.string.about_title, R.drawable.ic_about_info));
 		mFeatures = features.toArray(new MainFeatureInfo[0]);
 	}
 
@@ -214,8 +194,44 @@ public class MainActivity extends ActionBarActivity
 		// update the main content by replacing fragments
 		Fragment fragment = new MainFragment();
 
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+		MainFeatureInfo featureInfo = mFeatures[position];
+		switch (featureInfo.Feature)
+		{
+		case About:
+			fragment = AboutFragment.newInstance();
+			break;
+		case Register:
+			// fragment = WebViewFragment.newInstance("http://www.linuxfestnorthwest.org/node/2977/cod_registration");
+			startActivity(new Intent(this, WebViewActivity.class).
+					putExtra(WebViewActivity.KEY_URL, "http://www.linuxfestnorthwest.org/node/2977/cod_registration"));
+			break;
+		case Scan:
+			IntentIntegrator scannerIntent = new IntentIntegrator(this);
+			scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+			break;
+		case Sessions:
+			fragment = SessionsFragment.newInstance();
+			break;
+		case Sponsors:
+			// fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors");
+			startActivity(new Intent(this, WebViewActivity.class).
+					putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/sponsors"));
+			break;
+		case Venue:
+			// fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue");
+			startActivity(new Intent(this, WebViewActivity.class).
+					putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/information/venue"));
+			break;
+		default:
+			break;
+
+		}
+
+		if (fragment != null)
+		{
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+		}
 
 		// update selected item and title, then close the drawer
 		mDrawerList.setItemChecked(position, true);
@@ -261,9 +277,9 @@ public class MainActivity extends ActionBarActivity
 			}
 		}
 	}
-	
+
 	private static final String TAG = "MainActivity";
-	
+
 	private final MainFeatureInfo[] mFeatures;
 
 	private DrawerLayout mDrawerLayout;
