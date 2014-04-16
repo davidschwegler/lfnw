@@ -81,12 +81,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_scan_contact_xl" />
+                                android:src="@drawable/ic_scan_contact" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="Scan Badge" />
+                                android:text="scan_badge_title" />
                         </RelativeLayout>
                     </FrameLayout>
 
@@ -103,12 +103,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_sessions_calendar_blank_xl" />
+                                android:src="@drawable/ic_sessions_calendar_blank" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="Sessions" />
+                                android:text="@string/sessions_title" />
                         </RelativeLayout>
                     </FrameLayout>
                 </LinearLayout>
@@ -132,12 +132,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_venue_place_xl" />
+                                android:src="@drawable/ic_venue_place" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="Venue" />
+                                android:text="venue_title" />
                         </RelativeLayout>
                     </FrameLayout>
 
@@ -155,12 +155,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_sponsors_heart_xl" />
+                                android:src="@drawable/ic_sponsors_heart" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="Sponsors" />
+                                android:text="sponsors_title" />
                         </RelativeLayout>
                     </FrameLayout>
                 </LinearLayout>
@@ -184,12 +184,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_register_nametag_xl" />
+                                android:src="@drawable/ic_register_nametag" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="Register" />
+                                android:text="register_title" />
                         </RelativeLayout>
                     </FrameLayout>
 
@@ -207,12 +207,12 @@
                             <ImageView
                                 style="@style/MainButtonImageStyle"
                                 android:layout_above="@+id/mainButtonImageCaption"
-                                android:src="@drawable/ic_about_info_xl" />
+                                android:src="@drawable/ic_about_info" />
 
                             <TextView
                                 android:id="@+id/mainButtonImageCaption"
                                 style="@style/MainButtonCaptionStyle"
-                                android:text="About" />
+                                android:text="about_title" />
                         </RelativeLayout>
                     </FrameLayout>
                 </LinearLayout>

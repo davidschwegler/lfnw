@@ -1,7 +1,12 @@
 package com.appenjoyment.lfnw;
 
+import java.util.ArrayList;
+import java.util.List;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -15,9 +20,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import com.appenjoyment.lfnw.main.MainFeature;
+import com.appenjoyment.lfnw.main.MainFeatureInfo;
+import com.appenjoyment.utility.DisplayMetricsUtility;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import ezvcard.Ezvcard;
@@ -25,13 +34,37 @@ import ezvcard.VCard;
 
 public class MainActivity extends ActionBarActivity
 {
-	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerList;
-	private ActionBarDrawerToggle mDrawerToggle;
-
-	private CharSequence mDrawerTitle;
-	private CharSequence mTitle;
-	private String[] mPlanetTitles;
+	public MainActivity()
+	{
+		List<MainFeatureInfo> features = new ArrayList<MainFeatureInfo>();
+		for (MainFeature feature : MainFeature.values())
+		{
+			switch (feature)
+			{
+			case About:
+				features.add(new MainFeatureInfo(feature, R.string.about_title, R.drawable.ic_about_info));
+				break;
+			case Register:
+				features.add(new MainFeatureInfo(feature, R.string.register_title, R.drawable.ic_register_nametag));
+				break;
+			case Scan:
+				features.add(new MainFeatureInfo(feature, R.string.scan_badge_title, R.drawable.ic_scan_contact));
+				break;
+			case Sessions:
+				features.add(new MainFeatureInfo(feature, R.string.sessions_title, R.drawable.ic_sessions_calendar_blank));
+				break;
+			case Sponsors:
+				features.add(new MainFeatureInfo(feature, R.string.sponsors_title, R.drawable.ic_sponsors_heart));
+				break;
+			case Venue:
+				features.add(new MainFeatureInfo(feature, R.string.venue_title, R.drawable.ic_venue_place));
+				break;
+			default:
+				throw new IllegalArgumentException(feature.toString());
+			}
+		}
+		mFeatures = features.toArray(new MainFeatureInfo[0]);
+	}
 
 	// @Override
 	// protected void onCreate(Bundle savedInstanceState)
@@ -50,12 +83,52 @@ public class MainActivity extends ActionBarActivity
 		setContentView(R.layout.activity_main);
 
 		mTitle = mDrawerTitle = getTitle();
-		mPlanetTitles = new String[] { "Thing1", "Thing2" };
+
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
+		mDrawerList.setAdapter(new BaseAdapter()
+		{
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				TextView textView;
+				if (convertView != null)
+					textView = (TextView) convertView;
+				else
+					textView = (TextView) getLayoutInflater().inflate(R.layout.drawer_list_item, parent, false);
+
+				MainFeatureInfo featureInfo = mFeatures[position];
+				textView.setText(featureInfo.TitleId);
+				textView.setCompoundDrawablePadding(DisplayMetricsUtility.dpToPx(MainActivity.this, 4));
+				Drawable drawable = getResources().getDrawable(featureInfo.DrawableId).mutate();
+				drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+				int drawableSize = DisplayMetricsUtility.dpToPx(MainActivity.this, 32);
+				drawable.setBounds(0, 0, drawableSize, drawableSize);
+				textView.setCompoundDrawables(drawable, null, null, null);
+
+				return textView;
+			}
+
+			@Override
+			public int getCount()
+			{
+				return mFeatures.length;
+			}
+
+			@Override
+			public Object getItem(int position)
+			{
+				return mFeatures[position];
+			}
+
+			@Override
+			public long getItemId(int position)
+			{
+				return position;
+			}
+		});
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -146,7 +219,7 @@ public class MainActivity extends ActionBarActivity
 
 		// update selected item and title, then close the drawer
 		mDrawerList.setItemChecked(position, true);
-		setTitle(mPlanetTitles[position]);
+		setTitle(mFeatures[position].TitleId);
 		mDrawerLayout.closeDrawer(mDrawerList);
 	}
 
@@ -157,15 +230,10 @@ public class MainActivity extends ActionBarActivity
 		getSupportActionBar().setTitle(mTitle);
 	}
 
-	/**
-	 * When using the ActionBarDrawerToggle, you must call it during onPostCreate() and onConfigurationChanged()...
-	 */
-
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState)
 	{
 		super.onPostCreate(savedInstanceState);
-		// Sync the toggle state after onRestoreInstanceState has occurred.
 		mDrawerToggle.syncState();
 	}
 
@@ -173,7 +241,6 @@ public class MainActivity extends ActionBarActivity
 	public void onConfigurationChanged(Configuration newConfig)
 	{
 		super.onConfigurationChanged(newConfig);
-		// Pass any configuration change to the drawer toggls
 		mDrawerToggle.onConfigurationChanged(newConfig);
 	}
 
@@ -194,6 +261,14 @@ public class MainActivity extends ActionBarActivity
 			}
 		}
 	}
-
+	
 	private static final String TAG = "MainActivity";
+	
+	private final MainFeatureInfo[] mFeatures;
+
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	private ActionBarDrawerToggle mDrawerToggle;
+	private CharSequence mDrawerTitle;
+	private CharSequence mTitle;
 }
