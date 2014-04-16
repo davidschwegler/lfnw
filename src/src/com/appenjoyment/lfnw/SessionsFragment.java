@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +39,19 @@ public class SessionsFragment extends Fragment
 
 		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
 		SwipeRefreshLayoutUtility.applyTheme(m_swipeRefreshLayout);
+		
+		// TODO: support both SwipeRefreshLayout and StickyListHeadersListView -- for now, just disable the pull action on the SwipeRefreshLayout
+		// m_swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener()
+		// {
+		// @Override
+		// public void onRefresh()
+		// {
+		// refresh();
+		//
+		// // use our callbacks, don't assume we'll succesfully start refreshing
+		// m_swipeRefreshLayout.setRefreshing(m_isRefreshing);
+		// }
+		// });
 		m_swipeRefreshLayout.setEnabled(false);
 
 		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getChildFragmentManager());
@@ -97,11 +111,16 @@ public class SessionsFragment extends Fragment
 		switch (item.getItemId())
 		{
 		case R.id.menu_refresh:
-			getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
-					.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED));
+			refresh();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void refresh()
+	{
+		getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
+				.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED));
 	}
 
 	private final class SessionsListPagerAdapter extends FragmentPagerAdapter
@@ -152,7 +171,8 @@ public class SessionsFragment extends Fragment
 		public void onServiceConnected(ComponentName className, IBinder service)
 		{
 			m_boundUpdateSessionsService = ((UpdateSessionsService.UpdateSessionsBinder) service).getService();
-			m_swipeRefreshLayout.setRefreshing(m_boundUpdateSessionsService.isUpdating());
+			m_isRefreshing = m_boundUpdateSessionsService.isUpdating();
+			m_swipeRefreshLayout.setRefreshing(m_isRefreshing);
 		}
 
 		public void onServiceDisconnected(ComponentName className)
@@ -168,11 +188,19 @@ public class SessionsFragment extends Fragment
 		public void onReceive(Context context, Intent intent)
 		{
 			if (intent.getAction().equals(UpdateSessionsService.UPDATE_STARTED_ACTION))
+			{
+				m_isRefreshing = true;
 				m_swipeRefreshLayout.setRefreshing(true);
+			}
 			else if (intent.getAction().equals(UpdateSessionsService.UPDATE_COMPLETED_ACTION))
+			{
+				m_isRefreshing = false;
 				m_swipeRefreshLayout.setRefreshing(false);
+			}
 			else if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
+			{
 				m_sessionsListPagerAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 
@@ -182,4 +210,5 @@ public class SessionsFragment extends Fragment
 	private SessionsListPagerAdapter m_sessionsListPagerAdapter;
 	private ViewPager m_viewPager;
 	private SwipeRefreshLayout m_swipeRefreshLayout;
+	private boolean m_isRefreshing;
 }
