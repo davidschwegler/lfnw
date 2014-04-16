@@ -57,7 +57,7 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 				m_webView.reload();
 
 				// use our callbacks, don't assume we'll succesfully start reloading
-				m_swipeRefreshLayout.setRefreshing(false);
+				m_swipeRefreshLayout.setRefreshing(m_isLoading);
 			}
 		});
 
@@ -74,6 +74,7 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 			public void onPageStarted(WebView view, String url, Bitmap favicon)
 			{
 				super.onPageStarted(view, url, favicon);
+				m_isLoading = true;
 				m_swipeRefreshLayout.setRefreshing(true);
 			}
 
@@ -81,6 +82,7 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 			public void onPageFinished(WebView view, String url)
 			{
 				super.onPageFinished(view, url);
+				m_isLoading = false;
 				m_swipeRefreshLayout.setRefreshing(false);
 			}
 		});
@@ -133,8 +135,10 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 		return false;
 	}
 
+	private static String KEY_URL = "KEY_URL";
+
 	private SwipeRefreshLayout m_swipeRefreshLayout;
 	private WebView m_webView;
 	private String m_requestedUrl;
-	private static String KEY_URL = "KEY_URL";
+	private boolean m_isLoading;
 }
