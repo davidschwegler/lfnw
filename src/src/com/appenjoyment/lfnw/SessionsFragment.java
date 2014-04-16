@@ -37,11 +37,7 @@ public class SessionsFragment extends Fragment
 		setHasOptionsMenu(true);
 
 		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-		m_swipeRefreshLayout.setColorScheme(
-				R.color.swipe_refresh_progress_1,
-				R.color.swipe_refresh_progress_2,
-				R.color.swipe_refresh_progress_3,
-				R.color.swipe_refresh_progress_4);
+		SwipeRefreshLayoutUtility.applyTheme(m_swipeRefreshLayout);
 		m_swipeRefreshLayout.setEnabled(false);
 
 		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getChildFragmentManager());

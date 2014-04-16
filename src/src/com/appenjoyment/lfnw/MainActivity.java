@@ -60,8 +60,12 @@ public class MainActivity extends ActionBarActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
 
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
+		
+		setContentView(R.layout.activity_main);
+		
 		mTitle = mDrawerTitle = getTitle();
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -110,9 +114,6 @@ public class MainActivity extends ActionBarActivity
 			}
 		});
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
 
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
@@ -192,7 +193,7 @@ public class MainActivity extends ActionBarActivity
 	private void selectItem(int position)
 	{
 		// update the main content by replacing fragments
-		Fragment fragment = new MainFragment();
+		Fragment fragment = null;
 
 		MainFeatureInfo featureInfo = mFeatures[position];
 		switch (featureInfo.Feature)
@@ -201,9 +202,7 @@ public class MainActivity extends ActionBarActivity
 			fragment = AboutFragment.newInstance();
 			break;
 		case Register:
-			// fragment = WebViewFragment.newInstance("http://www.linuxfestnorthwest.org/node/2977/cod_registration");
-			startActivity(new Intent(this, WebViewActivity.class).
-					putExtra(WebViewActivity.KEY_URL, "http://www.linuxfestnorthwest.org/node/2977/cod_registration"));
+			fragment = WebViewFragment.newInstance("http://www.linuxfestnorthwest.org/node/2977/cod_registration");
 			break;
 		case Scan:
 			IntentIntegrator scannerIntent = new IntentIntegrator(this);
@@ -213,29 +212,25 @@ public class MainActivity extends ActionBarActivity
 			fragment = SessionsFragment.newInstance();
 			break;
 		case Sponsors:
-			// fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors");
-			startActivity(new Intent(this, WebViewActivity.class).
-					putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/sponsors"));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors");
 			break;
 		case Venue:
-			// fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue");
-			startActivity(new Intent(this, WebViewActivity.class).
-					putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/information/venue"));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue");
 			break;
 		default:
 			break;
-
 		}
 
+		// select the new tab and insert the fragment if there is one, otherwise it's just a link so don't change the tab
 		if (fragment != null)
 		{
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+			mDrawerList.setItemChecked(position, true);
+			setTitle(mFeatures[position].TitleId);
 		}
 
-		// update selected item and title, then close the drawer
-		mDrawerList.setItemChecked(position, true);
-		setTitle(mFeatures[position].TitleId);
 		mDrawerLayout.closeDrawer(mDrawerList);
 	}
 

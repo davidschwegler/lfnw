@@ -92,8 +92,9 @@ public class SessionsListFragment extends Fragment
 				@Override
 				public void onClick(View view)
 				{
-					startActivity(new Intent(getActivity(), WebViewActivity.class).
-							putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/node/" + viewHolder.nodeId));
+					startActivity(new Intent(getActivity(), WebViewActivity.class)
+						.putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/node/" + viewHolder.nodeId)
+						.putExtra(WebViewActivity.KEY_TITLE, viewHolder.title.getText()));
 				}
 			});
 
