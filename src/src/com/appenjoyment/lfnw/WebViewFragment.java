@@ -111,6 +111,9 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 			Uri uri = Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl);
 			startActivity(new Intent(Intent.ACTION_VIEW, uri));
 			return true;
+		case R.id.menu_refresh:
+			m_webView.reload();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}

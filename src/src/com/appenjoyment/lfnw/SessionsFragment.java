@@ -96,7 +96,7 @@ public class SessionsFragment extends Fragment
 	{
 		switch (item.getItemId())
 		{
-		case R.id.sessions_menu_refresh:
+		case R.id.menu_refresh:
 			getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
 					.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED));
 			return true;

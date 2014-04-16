@@ -37,10 +37,14 @@ public class WebViewActivity extends ActionBarActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		// respond to the action bar's Up/Home button
-		// I don't think we have to do this if we specify the parent in the manifest, but since this is a generic activity we sacrifice that capability
-		if (item.getItemId() == android.R.id.home)
+		switch (item.getItemId())
+		{
+		case android.R.id.home:
+			// respond to the action bar's Up/Home button
+			// I don't think we have to do this if we specify the parent in the manifest, but since this is a generic activity we sacrifice that capability
 			finish();
+			return true;
+		}
 
 		return super.onOptionsItemSelected(item);
 	}
