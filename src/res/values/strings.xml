@@ -14,6 +14,8 @@
     <string name="support_email_subject_prefix">Contact</string>
     <string name="sessions_title">Sessions</string>
     <string name="scan_badge_title">Scan Badge</string>
+    <string name="scan_badge_button_caption">Scan!</string>
+    <string name="scan_badge_list_empty">No previously scanned badges.</string>
     <string name="about_title">About</string>
     <string name="sponsors_title">Sponsors</string>
     <string name="venue_title">Venue</string>

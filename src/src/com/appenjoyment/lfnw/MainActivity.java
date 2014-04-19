@@ -2,7 +2,6 @@ package com.appenjoyment.lfnw;
 
 import java.util.ArrayList;
 import java.util.List;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -14,8 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,14 +20,9 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.appenjoyment.lfnw.main.MainFeature;
 import com.appenjoyment.lfnw.main.MainFeatureInfo;
 import com.appenjoyment.utility.DisplayMetricsUtility;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import ezvcard.Ezvcard;
-import ezvcard.VCard;
 
 public class MainActivity extends ActionBarActivity
 {
@@ -63,9 +55,9 @@ public class MainActivity extends ActionBarActivity
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
-		
+
 		setContentView(R.layout.activity_main);
-		
+
 		mTitle = mDrawerTitle = getTitle();
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -205,8 +197,7 @@ public class MainActivity extends ActionBarActivity
 			fragment = WebViewFragment.newInstance("http://www.linuxfestnorthwest.org/node/2977/cod_registration");
 			break;
 		case Scan:
-			IntentIntegrator scannerIntent = new IntentIntegrator(this);
-			scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+			fragment = ScanBadgeFragment.newInstance();
 			break;
 		case Sessions:
 			fragment = SessionsFragment.newInstance();
@@ -254,26 +245,6 @@ public class MainActivity extends ActionBarActivity
 		super.onConfigurationChanged(newConfig);
 		mDrawerToggle.onConfigurationChanged(newConfig);
 	}
-
-	public void onActivityResult(int requestCode, int resultCode, Intent intent)
-	{
-		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		if (scanResult != null && !TextUtils.isEmpty(scanResult.getContents()))
-		{
-			VCard vcard = Ezvcard.parse(scanResult.getContents()).first();
-			if (vcard != null)
-			{
-				startActivity(VCardContactUtility.createAddContactIntent(vcard));
-			}
-			else
-			{
-				Log.e(TAG, "vcard failed to parse");
-				Toast.makeText(this, "No contact found", Toast.LENGTH_SHORT).show();
-			}
-		}
-	}
-
-	private static final String TAG = "MainActivity";
 
 	private final MainFeatureInfo[] mFeatures;
 

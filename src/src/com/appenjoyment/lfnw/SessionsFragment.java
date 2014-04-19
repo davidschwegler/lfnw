@@ -16,7 +16,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,7 +38,7 @@ public class SessionsFragment extends Fragment
 
 		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
 		SwipeRefreshLayoutUtility.applyTheme(m_swipeRefreshLayout);
-		
+
 		// TODO: support both SwipeRefreshLayout and StickyListHeadersListView -- for now, just disable the pull action on the SwipeRefreshLayout
 		// m_swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener()
 		// {
