@@ -13,29 +13,23 @@
         android:layout_height="3dp"
         android:background="#FFFCA300" />
 
-    <FrameLayout
-        android:id="@+id/scan_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2" >
-
-        <Button
-            android:id="@+id/scan_button"
-            android:layout_width="128dp"
-            android:layout_height="64dp"
-            android:layout_gravity="center"
-            android:drawableLeft="@drawable/ic_scan_contact"
-            android:drawablePadding="8dp"
-            android:text="@string/scan_badge_button_caption" />
-    </FrameLayout>
+    <Button
+        android:id="@+id/scan_button"
+        android:layout_width="128dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal"
+        android:drawableLeft="@drawable/ic_scan_contact"
+        android:text="@string/scan_badge_button_caption" />
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.8" >
+        android:layout_height="match_parent" >
 
         <ListView
-            android:layout_width="wrap_content"
+            android:id="@+id/scan_badge_list"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
@@ -43,8 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="@string/scan_badge_list_empty" 
-            android:textStyle="italic"/>
+            android:text="@string/scan_badge_list_empty"
+            android:textStyle="italic" />
     </FrameLayout>
 
 </LinearLayout>
