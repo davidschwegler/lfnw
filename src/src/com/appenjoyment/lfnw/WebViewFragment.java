@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -41,6 +43,8 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		CookieSyncManager.createInstance(getActivity());
+
 		setHasOptionsMenu(true);
 
 		m_swipeRefreshLayout = new SwipeRefreshLayout(getActivity());
@@ -63,6 +67,7 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 			}
 		});
 
+		CookieManager.getInstance().setAcceptCookie(true);
 		m_webView.getSettings().setJavaScriptEnabled(true);
 
 		m_webView.setWebViewClient(new WebViewClient()
@@ -86,6 +91,8 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 				super.onPageFinished(view, url);
 				m_isLoading = false;
 				m_swipeRefreshLayout.setRefreshing(false);
+
+				CookieSyncManager.getInstance().sync();
 			}
 		});
 
@@ -97,6 +104,22 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 		m_webView.loadUrl(m_requestedUrl);
 
 		return m_swipeRefreshLayout;
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		CookieSyncManager.getInstance().startSync();
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+
+		CookieSyncManager.getInstance().stopSync();
 	}
 
 	@Override

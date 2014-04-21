@@ -194,7 +194,7 @@ public class MainActivity extends ActionBarActivity
 			fragment = AboutFragment.newInstance();
 			break;
 		case Register:
-			fragment = WebViewFragment.newInstance("http://www.linuxfestnorthwest.org/node/2977/cod_registration");
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/node/2977/cod_registration");
 			break;
 		case Scan:
 			fragment = ScanBadgeFragment.newInstance();
