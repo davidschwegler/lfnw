@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:local="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_scan_badge"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+   		local:showAsAction="always"
+        android:icon="@drawable/ic_menu_scan_contact"
+        android:title="@string/menu_scan_badge"/>
+    <!-- <item
+        android:id="@+id/menu_export"
+        android:orderInCategory="101"
+        android:showAsAction="never"
+        android:title="@string/menu_export"/>-->
+
+</menu>

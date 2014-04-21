@@ -8,13 +8,13 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_open_in_browser">Open in browser</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="menu_scan_badge">Scan badge</string>
     <string name="about_version">Version</string>
     <string name="about_support_email">Email</string>
     <string name="sessions_room_prefix">Room</string>
     <string name="support_email_subject_prefix">Contact</string>
     <string name="sessions_title">Sessions</string>
     <string name="scan_badge_title">Scan Badge</string>
-    <string name="scan_badge_button_caption">Scan!</string>
     <string name="scan_badge_list_empty">No previously scanned badges.</string>
     <string name="about_title">About</string>
     <string name="sponsors_title">Sponsors</string>
