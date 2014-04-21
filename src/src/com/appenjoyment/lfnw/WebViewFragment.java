@@ -1,6 +1,7 @@
 package com.appenjoyment.lfnw;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 public class WebViewFragment extends Fragment implements IHandleKeyDown
 {
@@ -111,7 +113,14 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 		case R.id.menu_open_in_browser:
 			String currentUrl = m_webView.getUrl();
 			Uri uri = Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl);
-			startActivity(new Intent(Intent.ACTION_VIEW, uri));
+			try
+			{
+				startActivity(new Intent(Intent.ACTION_VIEW, uri));
+			}
+			catch (ActivityNotFoundException e)
+			{
+				Toast.makeText(getActivity(), "Couldn't open in browser.", Toast.LENGTH_SHORT).show();
+			}
 			return true;
 		case R.id.menu_refresh:
 			m_webView.reload();

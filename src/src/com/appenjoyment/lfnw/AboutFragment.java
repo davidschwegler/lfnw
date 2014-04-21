@@ -1,5 +1,6 @@
 package com.appenjoyment.lfnw;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AboutFragment extends Fragment
 {
@@ -63,7 +65,14 @@ public class AboutFragment extends Fragment
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				Uri data = Uri.parse("mailto:" + supportEmail + "?subject=" + subject + "&body=" + body);
 				intent.setData(data);
-				startActivity(intent);
+				try
+				{
+					startActivity(intent);
+				}
+				catch (ActivityNotFoundException e)
+				{
+					Toast.makeText(getActivity(), "Couldn't send email", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 
