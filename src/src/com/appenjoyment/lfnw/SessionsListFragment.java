@@ -93,8 +93,8 @@ public class SessionsListFragment extends Fragment
 				public void onClick(View view)
 				{
 					startActivity(new Intent(getActivity(), WebViewActivity.class)
-						.putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/node/" + viewHolder.nodeId)
-						.putExtra(WebViewActivity.KEY_TITLE, viewHolder.title.getText()));
+							.putExtra(WebViewActivity.KEY_URL, "http://linuxfestnorthwest.org/node/" + viewHolder.nodeId)
+							.putExtra(WebViewActivity.KEY_TITLE, viewHolder.title.getText()));
 				}
 			});
 
@@ -158,7 +158,8 @@ public class SessionsListFragment extends Fragment
 				convertView = getActivity().getLayoutInflater().inflate(R.layout.sessions_list_header, parent, false);
 				holder.text = (TextView) convertView.findViewById(R.id.text);
 				convertView.setTag(holder);
-			} else
+			}
+			else
 			{
 				holder = (HeaderViewHolder) convertView.getTag();
 			}

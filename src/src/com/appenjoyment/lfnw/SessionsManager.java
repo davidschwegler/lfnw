@@ -315,7 +315,7 @@ public final class SessionsManager
 	}
 
 	private static final String TAG = "SessionsManager";
-	private static boolean DEBUG_TEST_SESSIONS = false;
+	private static final boolean DEBUG_TEST_SESSIONS = false;
 	private static SessionsManager s_instance;
 	private static Context s_applicationContext;
 
