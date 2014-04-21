@@ -7,6 +7,9 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_open_in_browser">Open in browser</string>
+    <string name="generic_copy">Copy</string>
+    <string name="scanned_badge_send_email">Send email</string>
+    <string name="scanned_badge_add_to_contacts">Add contact</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_scan_badge">Scan badge</string>
     <string name="about_version">Version</string>

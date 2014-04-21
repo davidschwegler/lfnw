@@ -178,7 +178,6 @@ public final class ScannedBadgesManager
 
 				data = new ScannedBadgeData();
 				data.contactData = new BadgeContactData();
-				data.contactData.email = "1@1.com";
 				data.contactData.firstName = "1";
 				data.contactData.lastName = "1s";
 				data.contactData.organization = "1 Co";
@@ -188,7 +187,6 @@ public final class ScannedBadgesManager
 				data = new ScannedBadgeData();
 				data.contactData = new BadgeContactData();
 				data.contactData.email = "2@2.com";
-				data.contactData.firstName = "2";
 				data.contactData.lastName = "2s";
 				data.contactData.organization = "2 Co";
 				data.dateScanned = new Date().getTime() + 2;
@@ -198,7 +196,6 @@ public final class ScannedBadgesManager
 				data.contactData = new BadgeContactData();
 				data.contactData.email = "3@3.com";
 				data.contactData.firstName = "3";
-				data.contactData.lastName = "3s";
 				data.contactData.organization = "3 Co";
 				data.dateScanned = new Date().getTime() + 3;
 				insert(db, data);
@@ -206,19 +203,40 @@ public final class ScannedBadgesManager
 				data = new ScannedBadgeData();
 				data.contactData = new BadgeContactData();
 				data.contactData.email = "4@4.com";
-				data.contactData.firstName = "4";
-				data.contactData.lastName = "4s";
 				data.contactData.organization = "4 Co";
 				data.dateScanned = new Date().getTime() + 4;
 				insert(db, data);
 
 				data = new ScannedBadgeData();
 				data.contactData = new BadgeContactData();
-				data.contactData.email = "5@5.com";
-				data.contactData.firstName = "5";
-				data.contactData.lastName = "5s";
 				data.contactData.organization = "5 Co";
 				data.dateScanned = new Date().getTime() + 5;
+				insert(db, data);
+
+				data = new ScannedBadgeData();
+				data.contactData = new BadgeContactData();
+				data.contactData.email = "6@6.com";
+				data.contactData.firstName = "6";
+				data.contactData.lastName = "6s";
+				data.dateScanned = new Date().getTime() + 6;
+				insert(db, data);
+
+				data = new ScannedBadgeData();
+				data.contactData = new BadgeContactData();
+				data.contactData.email = "7@7.com";
+				data.dateScanned = new Date().getTime() + 7;
+				insert(db, data);
+
+				data = new ScannedBadgeData();
+				data.contactData = new BadgeContactData();
+				data.contactData.firstName = "8";
+				data.contactData.lastName = "8s";
+				data.dateScanned = new Date().getTime() + 8;
+				insert(db, data);
+
+				data = new ScannedBadgeData();
+				data.contactData = new BadgeContactData();
+				data.dateScanned = new Date().getTime() + 9;
 				insert(db, data);
 			}
 		}

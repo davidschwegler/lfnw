@@ -18,9 +18,9 @@ public class BadgeContactData
 		if (firstName != null && lastName != null)
 			return firstName + " " + lastName;
 
-		if (lastName == null)
+		if (firstName != null)
 			return firstName;
 
-		return lastName;
+		return lastName != null ? lastName : "";
 	}
 }

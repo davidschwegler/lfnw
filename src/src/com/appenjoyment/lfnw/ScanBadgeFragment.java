@@ -1,13 +1,19 @@
 package com.appenjoyment.lfnw;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.CursorAdapter;
@@ -185,19 +191,98 @@ public class ScanBadgeFragment extends Fragment
 				@Override
 				public void onClick(View view)
 				{
+					final List<Integer> titleIds = new ArrayList<Integer>();
+					titleIds.add(R.string.scanned_badge_add_to_contacts);
+					if (!TextUtils.isEmpty(data.contactData.email))
+						titleIds.add(R.string.scanned_badge_send_email);
+					titleIds.add(R.string.generic_copy);
+
+					String[] titles = new String[titleIds.size()];
+					for (int index = 0; index < titleIds.size(); index++)
+						titles[index] = getResources().getString(titleIds.get(index).intValue());
+
 					new AlertDialog.Builder(getActivity())
-							.setItems(new String[] { "Add contact" }, new DialogInterface.OnClickListener()
+							.setItems(titles, new DialogInterface.OnClickListener()
 							{
 								@Override
 								public void onClick(DialogInterface dialog, int which)
 								{
-									if (which == 0)
+									switch (titleIds.get(which).intValue())
+									{
+									case R.string.scanned_badge_add_to_contacts:
 									{
 										Intent intent = BadgeContactIntentUtility.createAddContactIntent(data.contactData);
+
+										boolean success = false;
 										if (intent != null)
-											startActivity(intent);
-										else
+										{
+											try
+											{
+												startActivity(intent);
+												success = true;
+											}
+											catch (ActivityNotFoundException e)
+											{
+											}
+										}
+
+										if (!success)
 											Toast.makeText(getActivity(), "Couldn't add contact", Toast.LENGTH_SHORT).show();
+										break;
+									}
+									case R.string.scanned_badge_send_email:
+									{
+										Intent intent = new Intent(Intent.ACTION_VIEW);
+										Uri intentData = Uri.parse("mailto:" + data.contactData.email);
+										intent.setData(intentData);
+
+										boolean success = false;
+										try
+										{
+											startActivity(intent);
+											success = true;
+										}
+										catch (ActivityNotFoundException e)
+										{
+										}
+
+										if (!success)
+											Toast.makeText(getActivity(), "Couldn't send email", Toast.LENGTH_SHORT).show();
+										break;
+									}
+									case R.string.generic_copy:
+									{
+										StringBuilder text = new StringBuilder(data.contactData.buildFullName());
+										if (!TextUtils.isEmpty(data.contactData.organization))
+										{
+											if (text.length() != 0)
+												text.append("\n");
+											text.append(data.contactData.organization);
+										}
+
+										if (!TextUtils.isEmpty(data.contactData.email))
+										{
+											if (text.length() != 0)
+												text.append("\n");
+											text.append(data.contactData.email);
+										}
+
+										if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
+										{
+											android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getActivity()
+													.getSystemService(Context.CLIPBOARD_SERVICE);
+											clipboard.setText(text);
+										}
+										else
+										{
+											android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getActivity()
+													.getSystemService(Context.CLIPBOARD_SERVICE);
+											ClipData clip = ClipData.newPlainText(null, text);
+											clipboard.setPrimaryClip(clip);
+										}
+
+										break;
+									}
 									}
 								}
 							})
