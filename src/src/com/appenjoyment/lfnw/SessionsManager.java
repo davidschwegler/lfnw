@@ -281,7 +281,9 @@ public final class SessionsManager
 
 	private class SessionsDatabase extends SQLiteOpenHelper
 	{
-		public static final int DATABASE_VERSION = 1;
+		// v1: initial version
+		// v2: update with embedded 2014 data
+		public static final int DATABASE_VERSION = 2;
 		public static final String DATABASE_NAME = "Sessions.db";
 
 		public SessionsDatabase(Context context)
@@ -311,7 +313,10 @@ public final class SessionsManager
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 		{
-			// version 1 -- nothing to upgrade yet!
+			// v1: initial version
+			// v2: update with embedded 2014 data
+			if(oldVersion == 1)
+				insertInitialData(db);
 		}
 	}
 
