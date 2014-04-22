@@ -146,43 +146,50 @@ public class ScanBadgeFragment extends Fragment
 	@SuppressLint("WorldReadableFiles")
 	private void exportToCsv()
 	{
-		// create the CSV
 		String csvString = buildCsvString();
-		boolean success = true;
-		String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddhhmmssSSS", Locale.US).format(new Date()) + ".csv";
-		try
+		if (TextUtils.isEmpty(csvString))
 		{
-			// I think we want this world-readable here, as otherwise external apps we send it to wouldn't have access to our cache directory
-			@SuppressWarnings("deprecation")
-			FileOutputStream stream = getActivity().openFileOutput(csvFileName, Context.MODE_WORLD_READABLE);
-			stream.write(csvString.getBytes());
-			stream.close();
+			Toast.makeText(getActivity(), "Nothing to export", Toast.LENGTH_SHORT).show();
 		}
-		catch (IOException e)
+		else
 		{
-			success = false;
-			e.printStackTrace();
-		}
-
-		// email it
-		if (success)
-		{
-			Intent intent = new Intent(Intent.ACTION_SEND);
-			intent.setType("text/plain");
-			File csvFile = new File(getActivity().getFilesDir(), csvFileName);
-			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(csvFile));
+			// create the CSV
+			boolean success = true;
+			String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddhhmmssSSS", Locale.US).format(new Date()) + ".csv";
 			try
 			{
-				startActivity(intent);
+				// I think we want this world-readable here, as otherwise external apps we send it to wouldn't have access to our cache directory
+				@SuppressWarnings("deprecation")
+				FileOutputStream stream = getActivity().openFileOutput(csvFileName, Context.MODE_WORLD_READABLE);
+				stream.write(csvString.getBytes());
+				stream.close();
 			}
-			catch (ActivityNotFoundException e)
+			catch (IOException e)
 			{
 				success = false;
+				e.printStackTrace();
 			}
-		}
 
-		if (!success)
-			Toast.makeText(getActivity(), "Couldn't export scanned badges", Toast.LENGTH_SHORT).show();
+			// email it
+			if (success)
+			{
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("text/plain");
+				File csvFile = new File(getActivity().getFilesDir(), csvFileName);
+				intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(csvFile));
+				try
+				{
+					startActivity(intent);
+				}
+				catch (ActivityNotFoundException e)
+				{
+					success = false;
+				}
+			}
+
+			if (!success)
+				Toast.makeText(getActivity(), "Couldn't export scanned badges", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private String buildCsvString()
