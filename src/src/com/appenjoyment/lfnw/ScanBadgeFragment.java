@@ -1,8 +1,14 @@
 package com.appenjoyment.lfnw;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -30,6 +36,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.appenjoyment.utility.CsvUtility;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import ezvcard.Ezvcard;
@@ -93,6 +100,9 @@ public class ScanBadgeFragment extends Fragment
 			IntentIntegrator scannerIntent = new IntentIntegrator(getActivity());
 			scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
 			return true;
+		case R.id.menu_scan_badge_export:
+			exportToCsv();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -131,6 +141,68 @@ public class ScanBadgeFragment extends Fragment
 		{
 			super.onActivityResult(requestCode, resultCode, data);
 		}
+	}
+
+	@SuppressLint("WorldReadableFiles")
+	private void exportToCsv()
+	{
+		// create the CSV
+		String csvString = buildCsvString();
+		boolean success = true;
+		String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddhhmmssSSS", Locale.US).format(new Date()) + ".csv";
+		try
+		{
+			// I think we want this world-readable here, as otherwise external apps we send it to wouldn't have access to our cache directory
+			@SuppressWarnings("deprecation")
+			FileOutputStream stream = getActivity().openFileOutput(csvFileName, Context.MODE_WORLD_READABLE);
+			stream.write(csvString.getBytes());
+			stream.close();
+		}
+		catch (IOException e)
+		{
+			success = false;
+			e.printStackTrace();
+		}
+
+		// email it
+		if (success)
+		{
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("text/plain");
+			File csvFile = new File(getActivity().getFilesDir(), csvFileName);
+			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(csvFile));
+			try
+			{
+				startActivity(intent);
+			}
+			catch (ActivityNotFoundException e)
+			{
+				success = false;
+			}
+		}
+
+		if (!success)
+			Toast.makeText(getActivity(), "Couldn't export scanned badges", Toast.LENGTH_SHORT).show();
+	}
+
+	private String buildCsvString()
+	{
+		Cursor cursor = ScannedBadgesManager.getInstance(getActivity()).getAllScannedBadges();
+
+		StringBuilder csvString = new StringBuilder(128);
+		while (cursor.moveToNext())
+		{
+			ScannedBadgeData data = ScannedBadgesManager.createFromCursor(cursor);
+
+			String[] dataCsv = new String[4];
+			dataCsv[0] = data.contactData.firstName;
+			dataCsv[1] = data.contactData.lastName;
+			dataCsv[2] = data.contactData.email;
+			dataCsv[3] = data.contactData.organization;
+			csvString.append(CsvUtility.toCsvString(dataCsv));
+		}
+
+		return csvString.toString();
 	}
 
 	// TODO: use a loader, rather than all this deprecated stuff!
