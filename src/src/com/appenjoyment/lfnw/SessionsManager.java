@@ -227,17 +227,18 @@ public final class SessionsManager
 	{
 		Log.i(TAG, "Inserting initial sessions list");
 
+		insertInitialData(db, "sessions.json");
+	}
+
+	private void insertInitialData(SQLiteDatabase db, String assetName)
+	{
 		// temp code to load temp sessions file
 		InputStream stream = null;
 		ByteArrayOutputStream stringOutput = null;
 		String json = null;
 		try
 		{
-			if (BuildConfig.DEBUG && DEBUG_TEST_SESSIONS)
-				stream = s_applicationContext.getAssets().open("sessions_test_one_day.json");
-			else
-				stream = s_applicationContext.getAssets().open("sessions.json");
-
+			stream = s_applicationContext.getAssets().open(assetName);
 			stringOutput = new ByteArrayOutputStream();
 			byte[] bytes = new byte[8192];
 			while (stream.read(bytes) != -1)
@@ -315,7 +316,6 @@ public final class SessionsManager
 	}
 
 	private static final String TAG = "SessionsManager";
-	private static final boolean DEBUG_TEST_SESSIONS = false;
 	private static SessionsManager s_instance;
 	private static Context s_applicationContext;
 

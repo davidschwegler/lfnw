@@ -9,11 +9,14 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
 /**
  * E.g.
+ * 
+ * 2013
  * 
  * <pre>
  * 	 {
@@ -28,18 +31,38 @@ import android.util.Pair;
  * 		Track: "Mobile and Android"
  * 	},
  * </pre>
+ * 
+ * 2014
+ * 
+ * <pre>
+ * {
+ * 		node: {
+ * 			nid: "3403",
+ * 			title: "Developing for Android's Uniqueness",
+ * 			name: "G-103",
+ * 			day: "Sun, 27 Apr 2014",
+ * 			time: "1:30 PM to 2:20 PM",
+ * 			field_speakers: "DavidSchwegler",
+ * 			field_session_track: "Mobile Solutions",
+ * 			field_experience: "Intermediate"
+ * 			}
+ * 		},
+ * </post>
  */
 public class SessionData
 {
-	public String timeSlot;
+	public String day;
+	public String time;
 	public String title;
 	public String room;
 	public String nodeId;
-	public String[] speakers;
+	public String speakers;
 	public String experienceLevel;
 	public String track;
 
-	// e.g. "Saturday, April 27, 2013 - 15:00 to 16:00"
+	// e.g.
+	// day: "Sun, 27 Apr 2014",
+	// time: "1:30 PM to 2:20 PM",
 	// TODO: Timezone is always PST
 	@SuppressWarnings("deprecation")
 	public Pair<Date, Date> parseTimeSlotDateRange()
@@ -47,21 +70,16 @@ public class SessionData
 		Date startTime = null;
 		Date endTime = null;
 
-		if (timeSlot == null)
+		// in theory an event could be all-day, but there currently are none, so ignore that for now
+		if (TextUtils.isEmpty(day) || TextUtils.isEmpty(time))
 			return null;
 
-		String[] dayAndTimes = timeSlot.split("-");
-		if (dayAndTimes.length != 2)
-			return null;
-
-		String dayString = dayAndTimes[0].trim();
-
-		// HH:mm:ss z
-		SimpleDateFormat dateFormater = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
+		// day: "Sun, 27 Apr 2014",
+		SimpleDateFormat dateFormater = new SimpleDateFormat("EEEE, dd MMM yyyy", Locale.US);
 		Date parsedDay;
 		try
 		{
-			parsedDay = dateFormater.parse(dayString);
+			parsedDay = dateFormater.parse(day);
 		}
 		catch (ParseException e)
 		{
@@ -71,12 +89,13 @@ public class SessionData
 		if (parsedDay == null)
 			return null;
 
-		String[] timeStartEnd = dayAndTimes[1].split(" to ");
+		// time: "1:30 PM to 2:20 PM",
+		String[] timeStartEnd = time.split(" to ");
 		if (timeStartEnd.length != 2)
 			return null;
 
 		String startTimeString = timeStartEnd[0].trim();
-		SimpleDateFormat timeFormater = new SimpleDateFormat("HH:mm", Locale.US);
+		SimpleDateFormat timeFormater = new SimpleDateFormat("h:mm a", Locale.US);
 		Date parsedStartTime;
 		try
 		{
@@ -110,12 +129,15 @@ public class SessionData
 		{
 			List<SessionData> sessions = new ArrayList<SessionData>();
 
+			JSONObject containerObject = new JSONObject(in);
+
 			// list of sessions
-			JSONArray sessionsArray = new JSONArray(in);
+			JSONArray sessionsArray = containerObject.getJSONArray("nodes");
 			for (int index = 0; index < sessionsArray.length(); index++)
 			{
-				// session
-				JSONObject sessionObject = (JSONObject) sessionsArray.get(index);
+				// ultra weird, but each item in the array is a json object containing a node, not the node itself...
+				JSONObject sessionContainerObject = (JSONObject) sessionsArray.get(index);
+				JSONObject sessionObject = (JSONObject) sessionContainerObject.get("node");
 				sessions.add(parseSession(sessionObject));
 			}
 
@@ -128,22 +150,32 @@ public class SessionData
 			Log.e(TAG, "Error parsing Sessions Json", e);
 			return null;
 		}
+		catch (ClassCastException e)
+		{
+			// all-or-nothing for now...could be more lenient and skip failing sessions,
+			// but that could also lead to "dropping" a certain session and never knowing it
+			Log.e(TAG, "Error parsing Sessions Json", e);
+			return null;
+		}
 	}
 
 	private static SessionData parseSession(JSONObject sessionObject) throws JSONException
 	{
 		SessionData session = new SessionData();
 
-		// note: weirdness in json data -- string values are being set to empty arrays if nonexistant
-		Object timeSlotObject = sessionObject.get("node_field_data_field_slot_types_time_slot_title");
-		if (timeSlotObject instanceof String)
-			session.timeSlot = (String) timeSlotObject;
+		Object dayObject = sessionObject.get("day");
+		if (dayObject instanceof String)
+			session.day = (String) dayObject;
 
-		Object titleObject = sessionObject.get("node_title");
+		Object timeObject = sessionObject.get("time");
+		if (timeObject instanceof String)
+			session.time = (String) timeObject;
+
+		Object titleObject = sessionObject.get("title");
 		if (titleObject instanceof String)
 			session.title = (String) titleObject;
 
-		Object roomObject = sessionObject.get("field_room_slots_types_allowed_field_collection_item_title");
+		Object roomObject = sessionObject.get("name");
 		if (roomObject instanceof String)
 			session.room = (String) roomObject;
 
@@ -152,18 +184,17 @@ public class SessionData
 		if (nodeIdObject instanceof String)
 			session.nodeId = (String) nodeIdObject;
 
-		Object experienceLevelObject = sessionObject.get("Experience level");
+		Object experienceLevelObject = sessionObject.get("field_experience");
 		if (experienceLevelObject instanceof String)
 			session.experienceLevel = (String) experienceLevelObject;
 
-		Object trackObject = sessionObject.get("Track");
+		Object trackObject = sessionObject.get("field_session_track");
 		if (trackObject instanceof String)
 			session.track = (String) trackObject;
 
-		JSONArray speakersArray = sessionObject.getJSONArray("Speaker(s)");
-		session.speakers = new String[speakersArray.length()];
-		for (int index = 0; index < speakersArray.length(); index++)
-			session.speakers[index] = speakersArray.getString(index);
+		Object speakersObject = sessionObject.get("field_speakers");
+		if (speakersObject instanceof String)
+			session.speakers = (String) speakersObject;
 
 		return session;
 	}
