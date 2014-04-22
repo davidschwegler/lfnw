@@ -155,7 +155,7 @@ public class ScanBadgeFragment extends Fragment
 		{
 			// create the CSV
 			boolean success = true;
-			String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddhhmmssSSS", Locale.US).format(new Date()) + ".csv";
+			String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.US).format(new Date()) + ".csv";
 			try
 			{
 				// I think we want this world-readable here, as otherwise external apps we send it to wouldn't have access to our cache directory
