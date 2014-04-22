@@ -72,13 +72,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/license_freemarker" />
+                android:text="@string/license_ez_vcard" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/license_ez_vcard" />
+                android:text="@string/license_freemarker" />
 
             <TextView
                 android:layout_width="wrap_content"
