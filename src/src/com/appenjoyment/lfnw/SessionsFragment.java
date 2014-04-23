@@ -336,7 +336,11 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-			return SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(m_days.get(position));
+			// position can be > 0 if, for example, we went to page 2 then removed this page from the result list (e.g. by filtering to My Sessions)
+			if (position < m_days.size())
+				return SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(m_days.get(position));
+
+			return "";
 		}
 
 		private void loadDays()
