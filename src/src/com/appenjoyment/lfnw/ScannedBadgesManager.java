@@ -153,6 +153,7 @@ public final class ScannedBadgesManager
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
 
+		@SuppressWarnings("unused")
 		@Override
 		public void onCreate(SQLiteDatabase db)
 		{

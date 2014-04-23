@@ -31,7 +31,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="App Info"
+                android:text="@string/about_app_info"
                 android:textStyle="bold" />
 
             <TextView
@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Contact Us"
+                android:text="@string/about_contact_us"
                 android:textStyle="bold" />
 
             <TextView
@@ -59,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Licenses"
+                android:text="@string/about_licenses"
                 android:textStyle="bold" />
 
             <TextView

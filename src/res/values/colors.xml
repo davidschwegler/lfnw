@@ -1,37 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="site_background">#FF76A5BA</color>
     <color name="site_background_header_translucent">#DD76A5BA</color>
     <color name="site_background_dark">#FF3D6983</color>
     <color name="swipe_refresh_progress_1">#1E1916</color>
- <!-- 0E3B57 -->
     <color name="swipe_refresh_progress_2">#EAAE1F</color>
     <color name="swipe_refresh_progress_3">#6B9DB3</color>
     <color name="swipe_refresh_progress_4">#804932</color>
-    <!-- A light Holo shade of blue (holo_blue_light) -->
-    <!-- <color name="swipe_refresh_progress_1">#ff33b5e5</color> -->
-    <!-- A light Holo shade of gray -->
-    <color name="dholo_gray_light">#33999999</color>
-    <!-- A light Holo shade of green (holo_green_light) -->
-    <!-- <color name="swipe_refresh_progress_2">#ff99cc00</color> -->
-    <!-- A light Holo shade of red (holo_red_light) -->
-    <!-- <color name="swipe_refresh_progress_4">#ffff4444</color> -->
-    <!-- A dark Holo shade of blue -->
-    <color name="dholo_blue_dark">#ff0099cc</color>
-    <!-- A dark Holo shade of green -->
-    <color name="dholo_green_dark">#ff669900</color>
-    <!-- A dark Holo shade of red -->
-    <color name="dholo_red_dark">#ffcc0000</color>
-    <!-- A Holo shade of purple -->
-    <color name="dholo_purple">#ffaa66cc</color>
-    <!-- A light Holo shade of orange (holo_orange_light) -->
-    <!-- <color name="swipe_refresh_progress_3">#ffffbb33</color> -->
-    <!-- A dark Holo shade of orange -->
-    <color name="dholo_orange_dark">#ffff8800</color>
-    <!-- A really bright Holo shade of blue -->
-    <color name="dholo_blue_bright">#ff00ddff</color>
-    <!-- A really bright Holo shade of gray -->
-    <color name="dholo_gray_bright">#33CCCCCC</color>
 
 </resources>

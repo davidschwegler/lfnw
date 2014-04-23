@@ -3,7 +3,6 @@ package com.appenjoyment.lfnw;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -40,16 +39,6 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		features.add(new MainFeatureInfo(MainFeature.About, R.string.about_title, R.drawable.ic_about_info));
 		mFeatures = features.toArray(new MainFeatureInfo[0]);
 	}
-
-	// @Override
-	// protected void onCreate(Bundle savedInstanceState)
-	// {
-	// super.onCreate(savedInstanceState);
-	// setContentView(R.layout.activity_main);
-	//
-	// if (savedInstanceState == null)
-	// getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
-	// }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -145,50 +134,51 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			mDrawerLayout.openDrawer(GravityCompat.START);
 	}
 
-	// @Override
-	// public boolean onCreateOptionsMenu(Menu menu)
-	// {
-	// MenuInflater inflater = getMenuInflater();
-	// inflater.inflate(R.menu.main, menu);
-	// return super.onCreateOptionsMenu(menu);
-	// }
-	//
-	// /* Called whenever we call supportInvalidateOptionsMenu() */
-	// @Override
-	// public boolean onPrepareOptionsMenu(Menu menu)
-	// {
-	// // If the nav drawer is open, hide action items related to the content view
-	// boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-	// menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
-	// return super.onPrepareOptionsMenu(menu);
-	// }
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if (mDrawerToggle.onOptionsItemSelected(item))
 			return true;
 		return super.onOptionsItemSelected(item);
+	}
 
-		// // Handle action buttons
-		// switch (item.getItemId())
-		// {
-		// case R.id.action_websearch:
-		// // create intent to perform web search for this planet
-		// Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-		// intent.putExtra(SearchManager.QUERY, getSupportActionBar().getTitle());
-		// // catch event that there's no activity to handle intent
-		// if (intent.resolveActivity(getPackageManager()) != null)
-		// {
-		// startActivity(intent);
-		// } else
-		// {
-		// Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
-		// }
-		// return true;
-		// default:
-		// return super.onOptionsItemSelected(item);
-		// }
+	@Override
+	public void setTitle(CharSequence title)
+	{
+		getSupportActionBar().setTitle(title);
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState)
+	{
+		super.onPostCreate(savedInstanceState);
+		mDrawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+		if (currentFragment instanceof IHandleKeyDown)
+		{
+			if (((IHandleKeyDown) currentFragment).onKeyDown(keyCode, event))
+				return true;
+		}
+
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean isDrawerOpen()
+	{
+		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
 	}
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
@@ -247,48 +237,9 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		}
 	}
 
-	@Override
-	public void setTitle(CharSequence title)
-	{
-		getSupportActionBar().setTitle(title);
-	}
-
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState)
-	{
-		super.onPostCreate(savedInstanceState);
-		mDrawerToggle.syncState();
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig)
-	{
-		super.onConfigurationChanged(newConfig);
-		mDrawerToggle.onConfigurationChanged(newConfig);
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event)
-	{
-		Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
-		if (currentFragment instanceof IHandleKeyDown)
-		{
-			if (((IHandleKeyDown) currentFragment).onKeyDown(keyCode, event))
-				return true;
-		}
-
-		return super.onKeyDown(keyCode, event);
-	}
-
-	@Override
-	public boolean isDrawerOpen()
-	{
-		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
-	}
-
 	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer";
 	private static final String PREFERENCES_NAME = "MainActivity";
-	
+
 	private final MainFeatureInfo[] mFeatures;
 
 	private DrawerLayout mDrawerLayout;

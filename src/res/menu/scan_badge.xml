@@ -5,9 +5,9 @@
         android:id="@+id/menu_scan_badge"
         android:icon="@drawable/ic_menu_scan_contact"
         android:orderInCategory="100"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_scan_badge"
-        local:showAsAction="always"/>
+        local:showAsAction="ifRoom"/>
     <item
         android:id="@+id/menu_scan_badge_export"
         android:orderInCategory="101"
