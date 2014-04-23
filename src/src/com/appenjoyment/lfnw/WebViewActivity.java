@@ -2,6 +2,7 @@ package com.appenjoyment.lfnw;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 
 public class WebViewActivity extends ActionBarActivity
@@ -47,5 +48,15 @@ public class WebViewActivity extends ActionBarActivity
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		WebViewFragment fragment = (WebViewFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+		if (fragment.onKeyDown(keyCode, event))
+			return true;
+
+		return super.onKeyDown(keyCode, event);
 	}
 }

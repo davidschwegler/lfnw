@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -244,6 +245,19 @@ public class MainActivity extends ActionBarActivity
 	{
 		super.onConfigurationChanged(newConfig);
 		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+		if (currentFragment instanceof IHandleKeyDown)
+		{
+			if (((IHandleKeyDown) currentFragment).onKeyDown(keyCode, event))
+				return true;
+		}
+
+		return super.onKeyDown(keyCode, event);
 	}
 
 	private final MainFeatureInfo[] mFeatures;
