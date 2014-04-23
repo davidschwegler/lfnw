@@ -2,6 +2,8 @@ package com.appenjoyment.lfnw;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -127,12 +129,20 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 				IDrawerFragment drawerFragment = (IDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
 				if (drawerFragment != null)
 					drawerFragment.onDrawerOpened();
+
+				getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+						.edit()
+						.putBoolean(PREFERENCE_USER_CLOSED_DRAWER, true)
+						.apply();
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		if (savedInstanceState == null)
-			selectItem(0);
+			doSelectItem(0);
+
+		if (!getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_USER_CLOSED_DRAWER, false))
+			mDrawerLayout.openDrawer(GravityCompat.START);
 	}
 
 	// @Override
@@ -192,6 +202,13 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 
 	private void selectItem(int position)
 	{
+		doSelectItem(position);
+
+		mDrawerLayout.closeDrawer(mDrawerList);
+	}
+
+	private void doSelectItem(int position)
+	{
 		// update the main content by replacing fragments
 		Fragment fragment = null;
 
@@ -228,8 +245,6 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 
 			mDrawerList.setItemChecked(position, true);
 		}
-
-		mDrawerLayout.closeDrawer(mDrawerList);
 	}
 
 	@Override
@@ -271,6 +286,9 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
 	}
 
+	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer";
+	private static final String PREFERENCES_NAME = "MainActivity";
+	
 	private final MainFeatureInfo[] mFeatures;
 
 	private DrawerLayout mDrawerLayout;
