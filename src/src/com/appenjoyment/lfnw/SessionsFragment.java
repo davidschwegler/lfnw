@@ -43,7 +43,6 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	{
 		View view = inflater.inflate(R.layout.sessions, container, false);
 		setHasOptionsMenu(true);
-		getActivity().setTitle("");
 
 		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
 		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
@@ -115,6 +114,12 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		// calling startService() explicitly, rather than just bind(), also ensures the service lives on beyond the bound life
 		getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class).
 				putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_INTERVAL));
+
+		// can't populate the navigation list unless the navigation mode is List, so populate the navigation list first, then set it back to standard if needed
+		if (getActivity() instanceof IDrawerActivity && ((IDrawerActivity) getActivity()).isDrawerOpen())
+			actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+		else
+			getActivity().setTitle("");
 
 		return view;
 	}
