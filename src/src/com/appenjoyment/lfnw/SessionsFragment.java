@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import com.appenjoyment.utility.HashCodeUtility;
 
 public class SessionsFragment extends Fragment implements IDrawerFragment
 {
@@ -230,7 +230,7 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 					.putInt(PREFERENCE_NAVIGATION_OPTION_YEAR, m_navigationOption.year)
 					.putBoolean(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY, m_navigationOption.starredOnly)
 					.putString(PREFERENCE_NAVIGATION_OPTION_TITLE, m_navigationOption.title)
-					.apply();
+					.commit();
 		}
 	}
 
@@ -441,7 +441,7 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		@Override
 		public int hashCode()
 		{
-			return Objects.hash(year, starredOnly);
+			return HashCodeUtility.hash(year, starredOnly);
 		}
 
 		private static final String KEY_YEAR = "Year";

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -298,6 +299,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 					new AlertDialog.Builder(getActivity())
 							.setItems(titles, new DialogInterface.OnClickListener()
 							{
+								@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 								@Override
 								public void onClick(DialogInterface dialog, int which)
 								{

@@ -122,7 +122,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 				getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 						.edit()
 						.putBoolean(PREFERENCE_USER_CLOSED_DRAWER, true)
-						.apply();
+						.commit();
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
