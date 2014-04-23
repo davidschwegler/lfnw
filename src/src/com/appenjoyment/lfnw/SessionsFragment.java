@@ -96,6 +96,8 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		// });
 		m_swipeRefreshLayout.setEnabled(false);
 
+		m_noDaysTextView = view.findViewById(R.id.sessions_list_empty);
+
 		m_sessionsListPagerAdapter = new SessionsListPagerAdapter(getChildFragmentManager());
 		m_viewPager = (ViewPager) view.findViewById(R.id.sessions_pager);
 		m_viewPager.setAdapter(m_sessionsListPagerAdapter);
@@ -303,6 +305,7 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		public void notifyDataSetChanged()
 		{
 			loadDays();
+
 			super.notifyDataSetChanged();
 		}
 
@@ -348,6 +351,8 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 				m_days = manager.getSessionDaysForYear(m_navigationOption.year, m_navigationOption.starredOnly);
 				m_starredOnly = m_navigationOption.starredOnly;
 			}
+
+			m_noDaysTextView.setVisibility(m_days.size() == 0 ? View.VISIBLE : View.GONE);
 		}
 
 		private boolean m_starredOnly;
@@ -455,6 +460,7 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	private BroadcastReceiver m_updateSessionsReceiver;
 	private SessionsListPagerAdapter m_sessionsListPagerAdapter;
 	private ViewPager m_viewPager;
+	private View m_noDaysTextView;
 	private SwipeRefreshLayout m_swipeRefreshLayout;
 	private List<NavigationOption> m_navigationOptions;
 	private OnNavigationListener m_actionBarNavigationListener;
