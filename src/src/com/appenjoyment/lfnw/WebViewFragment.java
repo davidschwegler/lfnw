@@ -23,17 +23,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-public class WebViewFragment extends Fragment implements IHandleKeyDown
+public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawerFragment
 {
-	public static WebViewFragment newInstance(String url)
+	public static WebViewFragment newInstance(String url, String title)
 	{
 		if (url == null || url.length() == 0)
 			throw new IllegalArgumentException("No Url");
+
+		if (title == null || title.length() == 0)
+			throw new IllegalArgumentException("No Title");
 
 		WebViewFragment fragment = new WebViewFragment();
 
 		Bundle args = new Bundle();
 		args.putString(KEY_URL, url);
+		args.putString(KEY_TITLE, title);
 		fragment.setArguments(args);
 
 		return fragment;
@@ -46,6 +50,9 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 		CookieSyncManager.createInstance(getActivity());
 
 		setHasOptionsMenu(true);
+
+		m_title = getArguments().getString(KEY_TITLE);
+		getActivity().setTitle(m_title);
 
 		m_swipeRefreshLayout = new SwipeRefreshLayout(getActivity());
 		m_swipeRefreshLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -125,7 +132,8 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
-		inflater.inflate(R.menu.webview, menu);
+		if (!(getActivity() instanceof IDrawerActivity) || !((IDrawerActivity) getActivity()).isDrawerOpen())
+			inflater.inflate(R.menu.webview, menu);
 	}
 
 	@Override
@@ -167,10 +175,25 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown
 		return false;
 	}
 
+	@Override
+	public void onDrawerOpened()
+	{
+		getActivity().supportInvalidateOptionsMenu();
+	}
+
+	@Override
+	public void onDrawerClosed()
+	{
+		getActivity().setTitle(m_title);
+		getActivity().supportInvalidateOptionsMenu();
+	}
+
 	private static String KEY_URL = "KEY_URL";
+	private static String KEY_TITLE = "KEY_TITLE";
 
 	private SwipeRefreshLayout m_swipeRefreshLayout;
 	private WebView m_webView;
 	private String m_requestedUrl;
+	private String m_title;
 	private boolean m_isLoading;
 }

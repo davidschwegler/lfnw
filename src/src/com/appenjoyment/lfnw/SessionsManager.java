@@ -73,24 +73,55 @@ public final class SessionsManager
 	}
 
 	/**
-	 * Returns the days of all sessions, sorted by date
+	 * Returns a list of gregorian years that have sessions, most recent first.
 	 */
 	@SuppressWarnings("deprecation")
-	public List<Date> getSessionDays()
+	public List<Integer> getYears()
 	{
 		// get all the session start times (small list)
 		Cursor cursor = query(true, Sessions.TABLE_NAME,
 				new String[] { Sessions.COLUMN_NAME_START_TIME }, null, null,
 				Sessions.COLUMN_NAME_START_TIME, null,
+				Sessions.COLUMN_NAME_START_TIME + " desc", null);
+
+		// aggregate the dates based on year (way to do this in sqlite? using string functions?)
+		List<Integer> years = new ArrayList<Integer>();
+		int lastYear = -1;
+		while (cursor.moveToNext())
+		{
+			Date date = new Date(cursor.getLong(0));
+			if (lastYear == -1 || date.getYear() != lastYear)
+			{
+				lastYear = date.getYear();
+				years.add(lastYear + 1900);
+			}
+		}
+
+		cursor.close();
+
+		return years;
+	}
+
+	/**
+	 * Returns the days of all sessions on the specified gregorian calendar year, sorted by date, optionally only those which are starred.
+	 */
+	@SuppressWarnings("deprecation")
+	public List<Date> getSessionDaysForYear(int year, boolean starredOnly)
+	{
+		// get all the session start times (small list)
+		Cursor cursor = query(true, Sessions.TABLE_NAME,
+				new String[] { Sessions.COLUMN_NAME_START_TIME }, starredOnly ? Sessions.COLUMN_NAME_STARRED + "=1" : null, null,
+				Sessions.COLUMN_NAME_START_TIME, null,
 				Sessions.COLUMN_NAME_START_TIME, null);
 
 		// aggregate the dates based on day (way to do this in sqlite? using string functions?)
 		List<Date> dates = new ArrayList<Date>();
+		int dateYear = year - 1900;
 		Date lastDate = null;
 		while (cursor.moveToNext())
 		{
 			Date date = new Date(cursor.getLong(0));
-			if (lastDate == null || date.getDate() != lastDate.getDate())
+			if (date.getYear() == dateYear && (lastDate == null || date.getDate() != lastDate.getDate()))
 			{
 				lastDate = date;
 				dates.add(date);
@@ -103,16 +134,17 @@ public final class SessionsManager
 	}
 
 	/**
-	 * Returns all sessions on this date, sorted by date, then by title
+	 * Returns all sessions on this date, sorted by date, then by title, optionally only those which are starred.
 	 */
 	@SuppressWarnings("deprecation")
-	public Cursor getAllSessionsOnDay(Date day)
+	public Cursor getAllSessionsOnDay(Date day, boolean starredOnly)
 	{
 		long timeMidnightAM = new Date(day.getYear(), day.getMonth(), day.getDate()).getTime();
 		long timeMidnightPM = new Date(day.getYear(), day.getMonth(), day.getDate() + 1).getTime();
 
 		// all sessions which start before midnight tonight and end after midnight this morning, ordered by the start time then the end time
-		return query(false, Sessions.TABLE_NAME, ALL_SESSIONS_ROWS, Sessions.COLUMN_NAME_START_TIME + " < ? AND " + Sessions.COLUMN_NAME_END_TIME + " > ?",
+		return query(false, Sessions.TABLE_NAME, ALL_SESSIONS_ROWS, Sessions.COLUMN_NAME_START_TIME + " < ? AND " + Sessions.COLUMN_NAME_END_TIME + " > ?" +
+				(starredOnly ? " AND " + Sessions.COLUMN_NAME_STARRED + "=1" : ""),
 				new String[] { String.valueOf(timeMidnightPM), String.valueOf(timeMidnightAM) }, null, null,
 				Sessions.COLUMN_NAME_START_TIME + ", " + Sessions.COLUMN_NAME_END_TIME + "," + Sessions.COLUMN_NAME_TITLE, null);
 	}
@@ -315,7 +347,7 @@ public final class SessionsManager
 		{
 			// v1: initial version
 			// v2: update with embedded 2014 data
-			if(oldVersion == 1)
+			if (oldVersion == 1)
 				insertInitialData(db);
 		}
 	}

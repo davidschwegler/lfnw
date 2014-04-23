@@ -23,7 +23,6 @@ public class WebViewActivity extends ActionBarActivity
 		String title = getIntent().getStringExtra(KEY_TITLE);
 		if (title == null || title.length() == 0)
 			throw new IllegalArgumentException("No Title");
-		getSupportActionBar().setTitle(title);
 
 		if (savedInstanceState == null)
 		{
@@ -31,7 +30,7 @@ public class WebViewActivity extends ActionBarActivity
 			if (url == null || url.length() == 0)
 				throw new IllegalArgumentException("No Url");
 
-			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, WebViewFragment.newInstance(url)).commit();
+			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, WebViewFragment.newInstance(url, title)).commit();
 		}
 	}
 

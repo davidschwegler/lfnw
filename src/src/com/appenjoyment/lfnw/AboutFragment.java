@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AboutFragment extends Fragment
+public class AboutFragment extends Fragment implements IDrawerFragment
 {
 	public static AboutFragment newInstance()
 	{
@@ -27,6 +27,8 @@ public class AboutFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		getActivity().setTitle(R.string.about_title);
+		
 		View view = inflater.inflate(R.layout.about, container, false);
 
 		PackageInfo packageInfo = null;
@@ -77,5 +79,16 @@ public class AboutFragment extends Fragment
 		});
 
 		return view;
+	}
+
+	@Override
+	public void onDrawerOpened()
+	{
+	}
+
+	@Override
+	public void onDrawerClosed()
+	{
+		getActivity().setTitle(R.string.about_title);
 	}
 }

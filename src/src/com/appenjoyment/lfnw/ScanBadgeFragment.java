@@ -42,7 +42,7 @@ import com.google.zxing.integration.android.IntentResult;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
 
-public class ScanBadgeFragment extends Fragment
+public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 {
 	public static ScanBadgeFragment newInstance()
 	{
@@ -65,6 +65,7 @@ public class ScanBadgeFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		setHasOptionsMenu(true);
+		getActivity().setTitle(R.string.scan_badge_title);
 
 		View view = inflater.inflate(R.layout.scan_badge, container, false);
 
@@ -88,7 +89,8 @@ public class ScanBadgeFragment extends Fragment
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
-		inflater.inflate(R.menu.scan_badge, menu);
+		if (!(getActivity() instanceof IDrawerActivity) || !((IDrawerActivity) getActivity()).isDrawerOpen())
+			inflater.inflate(R.menu.scan_badge, menu);
 	}
 
 	@Override
@@ -141,6 +143,19 @@ public class ScanBadgeFragment extends Fragment
 		{
 			super.onActivityResult(requestCode, resultCode, data);
 		}
+	}
+
+	@Override
+	public void onDrawerOpened()
+	{
+		getActivity().supportInvalidateOptionsMenu();
+	}
+
+	@Override
+	public void onDrawerClosed()
+	{
+		getActivity().setTitle(R.string.scan_badge_title);
+		getActivity().supportInvalidateOptionsMenu();
 	}
 
 	@SuppressLint("WorldReadableFiles")

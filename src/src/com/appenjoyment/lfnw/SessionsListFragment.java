@@ -22,12 +22,37 @@ import com.emilsjolander.components.stickylistheaders.StickyListHeadersListView;
 
 public class SessionsListFragment extends Fragment
 {
-	public static final String ARG_DATE = "date";
+	public static final String ARGUMENT_DATE = "Date";
+	public static final String ARGUMENT_STARRED_ONLY = "StarredOnly";
+
+	public static SessionsListFragment newInstance(Date date, boolean starredOnly)
+	{
+		Bundle args = new Bundle();
+		args.putLong(ARGUMENT_DATE, date.getTime());
+		args.putBoolean(ARGUMENT_STARRED_ONLY, starredOnly);
+
+		SessionsListFragment fragment = new SessionsListFragment();
+		fragment.setArguments(args);
+		return fragment;
+	}
+
+	public Date getDate()
+	{
+		return m_date;
+	}
+
+	public boolean starredOnly()
+	{
+		return m_starredOnly;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+
+		m_date = new Date(getArguments().getLong(ARGUMENT_DATE));
+		m_starredOnly = getArguments().getBoolean(ARGUMENT_STARRED_ONLY);
 
 		m_updateSessionsReceiver = new UpdateSessionsReceiver();
 
@@ -44,7 +69,7 @@ public class SessionsListFragment extends Fragment
 		StickyListHeadersListView listView = (StickyListHeadersListView) rootView.findViewById(R.id.sessions_listview);
 		listView.setEmptyView(rootView.findViewById(R.id.sessions_list_empty));
 
-		Cursor cursor = SessionsManager.getInstance(getActivity()).getAllSessionsOnDay(new Date(getArguments().getLong(ARG_DATE)));
+		Cursor cursor = SessionsManager.getInstance(getActivity()).getAllSessionsOnDay(m_date, m_starredOnly);
 		m_adapter = new SessionsAdapter(getActivity(), cursor);
 		listView.setAdapter(m_adapter);
 
@@ -212,4 +237,6 @@ public class SessionsListFragment extends Fragment
 
 	private UpdateSessionsReceiver m_updateSessionsReceiver;
 	private SessionsAdapter m_adapter;
+	private Date m_date;
+	private boolean m_starredOnly;
 }

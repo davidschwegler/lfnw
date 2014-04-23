@@ -1,29 +1,37 @@
 package com.appenjoyment.lfnw;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.OnNavigationListener;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
 
-public class SessionsFragment extends Fragment
+public class SessionsFragment extends Fragment implements IDrawerFragment
 {
 	public static SessionsFragment newInstance()
 	{
@@ -35,6 +43,42 @@ public class SessionsFragment extends Fragment
 	{
 		View view = inflater.inflate(R.layout.sessions, container, false);
 		setHasOptionsMenu(true);
+		getActivity().setTitle("");
+
+		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
+		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+		loadNavigationOptions();
+		if (m_navigationOptions.size() != 0)
+		{
+			if (savedInstanceState != null)
+			{
+				NavigationOption navigationOption = NavigationOption.createFromBundle(savedInstanceState.getBundle(KEY_NAVIGATION_OPTION));
+				if (m_navigationOptions.indexOf(navigationOption) != -1)
+					m_navigationOption = navigationOption;
+			}
+			if (m_navigationOption == null)
+				m_navigationOption = loadLastNavigationOption();
+			if (m_navigationOption == null)
+				m_navigationOption = m_navigationOptions.get(0);
+		}
+
+		m_actionBarNavigationListener = new OnNavigationListener()
+		{
+			@Override
+			public boolean onNavigationItemSelected(int itemPosition, long itemId)
+			{
+				m_navigationOption = m_navigationOptions.get(itemPosition);
+				saveLastNavigationOption();
+				m_sessionsListPagerAdapter.notifyDataSetChanged();
+				return true;
+			}
+		};
+
+		m_navigationListAdapter = createNavigationListAdapter();
+		actionBarActivity.getSupportActionBar().setListNavigationCallbacks(m_navigationListAdapter, m_actionBarNavigationListener);
+		if (m_navigationOption != null)
+			actionBarActivity.getSupportActionBar().setSelectedNavigationItem(m_navigationOptions.indexOf(m_navigationOption));
 
 		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
 		SwipeRefreshLayoutUtility.applyTheme(m_swipeRefreshLayout);
@@ -92,16 +136,31 @@ public class SessionsFragment extends Fragment
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+
+		if (m_navigationOption != null)
+			outState.putBundle(KEY_NAVIGATION_OPTION, m_navigationOption.saveToBundle());
+	}
+
+	@Override
 	public void onDestroyView()
 	{
 		super.onDestroy();
+
 		getActivity().unregisterReceiver(m_updateSessionsReceiver);
+
+		ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+		actionBar.setListNavigationCallbacks(null, null);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
-		inflater.inflate(R.menu.sessions, menu);
+		if (!(getActivity() instanceof IDrawerActivity) || !((IDrawerActivity) getActivity()).isDrawerOpen())
+			inflater.inflate(R.menu.sessions, menu);
 	}
 
 	@Override
@@ -116,38 +175,148 @@ public class SessionsFragment extends Fragment
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onDrawerOpened()
+	{
+		getActivity().supportInvalidateOptionsMenu();
+
+		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
+		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+	}
+
+	@Override
+	public void onDrawerClosed()
+	{
+		getActivity().setTitle("");
+		getActivity().supportInvalidateOptionsMenu();
+
+		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
+		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+	}
+
 	private void refresh()
 	{
 		getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
 				.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED));
 	}
 
-	private final class SessionsListPagerAdapter extends FragmentPagerAdapter
+	private NavigationOption loadLastNavigationOption()
+	{
+		SharedPreferences prefs = getActivity().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+		if (prefs.contains(PREFERENCE_NAVIGATION_OPTION_YEAR) &&
+				prefs.contains(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY) &&
+				prefs.contains(PREFERENCE_NAVIGATION_OPTION_TITLE))
+		{
+			return new NavigationOption(prefs.getInt(PREFERENCE_NAVIGATION_OPTION_YEAR, -1),
+					prefs.getBoolean(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY, false),
+					prefs.getString(PREFERENCE_NAVIGATION_OPTION_TITLE, null));
+		}
+
+		return null;
+	}
+
+	private void saveLastNavigationOption()
+	{
+		if (m_navigationOption != null)
+		{
+			getActivity().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
+					.putInt(PREFERENCE_NAVIGATION_OPTION_YEAR, m_navigationOption.year)
+					.putBoolean(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY, m_navigationOption.starredOnly)
+					.putString(PREFERENCE_NAVIGATION_OPTION_TITLE, m_navigationOption.title)
+					.apply();
+		}
+	}
+
+	private void loadNavigationOptions()
+	{
+		m_navigationOptions = new ArrayList<NavigationOption>();
+		for (int year : SessionsManager.getInstance(getActivity()).getYears())
+		{
+			m_navigationOptions.add(new NavigationOption(year, false, getResources().getString(R.string.sessions_navigation_year_format, year)));
+			m_navigationOptions.add(new NavigationOption(year, true, getResources().getString(R.string.sessions_navigation_year_starred_format, year)));
+		}
+	}
+
+	private BaseAdapter createNavigationListAdapter()
+	{
+		return new BaseAdapter()
+		{
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				if (convertView == null)
+					convertView = getActivity().getLayoutInflater().inflate(R.layout.action_bar_spinner_title_list_item, parent, false);
+
+				TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+				text.setText(m_navigationOptions.get(position).title);
+
+				return convertView;
+			}
+
+			@Override
+			public View getDropDownView(int position, View convertView, ViewGroup parent)
+			{
+				if (convertView == null)
+					convertView = getActivity().getLayoutInflater().inflate(R.layout.action_bar_spinner_list_item, parent, false);
+
+				TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+				text.setText(m_navigationOptions.get(position).title);
+
+				return convertView;
+			}
+
+			@Override
+			public long getItemId(int position)
+			{
+				return position;
+			}
+
+			@Override
+			public Object getItem(int position)
+			{
+				return m_navigationOptions.get(position);
+			}
+
+			@Override
+			public int getCount()
+			{
+				return m_navigationOptions.size();
+			}
+		};
+	}
+
+	private final class SessionsListPagerAdapter extends FragmentStatePagerAdapter
 	{
 		public SessionsListPagerAdapter(FragmentManager fm)
 		{
 			super(fm);
 
-			m_days = SessionsManager.getInstance(getActivity()).getSessionDays();
+			loadDays();
 		}
 
 		@Override
 		public void notifyDataSetChanged()
 		{
-			m_days = SessionsManager.getInstance(getActivity()).getSessionDays();
-
+			loadDays();
 			super.notifyDataSetChanged();
+		}
+
+		@Override
+		public int getItemPosition(Object object)
+		{
+			SessionsListFragment fragment = (SessionsListFragment) object;
+
+			int position = m_days.indexOf(fragment.getDate());
+			if (position != -1 && m_starredOnly == fragment.starredOnly())
+				return position;
+			else
+				return POSITION_NONE;
 		}
 
 		@Override
 		public Fragment getItem(int i)
 		{
-			Fragment fragment = new SessionsListFragment();
-			Bundle args = new Bundle();
-
-			args.putLong(SessionsListFragment.ARG_DATE, m_days.get(i).getTime());
-			fragment.setArguments(args);
-			return fragment;
+			return SessionsListFragment.newInstance(m_days.get(i), m_starredOnly);
 		}
 
 		@Override
@@ -162,6 +331,21 @@ public class SessionsFragment extends Fragment
 			return SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(m_days.get(position));
 		}
 
+		private void loadDays()
+		{
+			if (m_navigationOption == null)
+			{
+				m_days = new ArrayList<Date>();
+			}
+			else
+			{
+				SessionsManager manager = SessionsManager.getInstance(getActivity());
+				m_days = manager.getSessionDaysForYear(m_navigationOption.year, m_navigationOption.starredOnly);
+				m_starredOnly = m_navigationOption.starredOnly;
+			}
+		}
+
+		private boolean m_starredOnly;
 		private List<Date> m_days;
 	}
 
@@ -198,10 +382,68 @@ public class SessionsFragment extends Fragment
 			}
 			else if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
 			{
+				m_navigationListAdapter.notifyDataSetChanged();
 				m_sessionsListPagerAdapter.notifyDataSetChanged();
 			}
 		}
 	}
+
+	private static final class NavigationOption
+	{
+		public static NavigationOption createFromBundle(Bundle savedBundle)
+		{
+			return new NavigationOption(savedBundle.getInt(KEY_YEAR), savedBundle.getBoolean(KEY_STARRED_ONLY), savedBundle.getString(KEY_TITLE));
+		}
+
+		public NavigationOption(int year, boolean starredOnly, String title)
+		{
+			this.year = year;
+			this.starredOnly = starredOnly;
+			this.title = title;
+		}
+
+		public Bundle saveToBundle()
+		{
+			Bundle bundle = new Bundle();
+			bundle.putInt(KEY_YEAR, year);
+			bundle.putBoolean(KEY_STARRED_ONLY, starredOnly);
+			bundle.putString(KEY_TITLE, title);
+
+			return bundle;
+		}
+
+		public final int year;
+
+		public final boolean starredOnly;
+
+		public final String title;
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (o == null || o.getClass() != this.getClass())
+				return false;
+
+			NavigationOption other = (NavigationOption) o;
+			return year == other.year && starredOnly == other.starredOnly;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return Objects.hash(year, starredOnly);
+		}
+
+		private static final String KEY_YEAR = "Year";
+		private static final String KEY_STARRED_ONLY = "StarredOnly";
+		private static final String KEY_TITLE = "Title";
+	}
+
+	private static final String KEY_NAVIGATION_OPTION = "NavigationOption";
+	private static final String PREFERENCES_NAME = "Sessions";
+	private static final String PREFERENCE_NAVIGATION_OPTION_YEAR = "Year";
+	private static final String PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY = "StarredOnly";
+	private static final String PREFERENCE_NAVIGATION_OPTION_TITLE = "Title";
 
 	private UpdateSessionsService m_boundUpdateSessionsService;
 	private ServiceConnection m_updateSessionsServiceConnection;
@@ -209,5 +451,9 @@ public class SessionsFragment extends Fragment
 	private SessionsListPagerAdapter m_sessionsListPagerAdapter;
 	private ViewPager m_viewPager;
 	private SwipeRefreshLayout m_swipeRefreshLayout;
+	private List<NavigationOption> m_navigationOptions;
+	private OnNavigationListener m_actionBarNavigationListener;
+	private BaseAdapter m_navigationListAdapter;
+	private NavigationOption m_navigationOption;
 	private boolean m_isRefreshing;
 }

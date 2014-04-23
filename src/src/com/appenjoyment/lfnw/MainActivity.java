@@ -25,7 +25,7 @@ import com.appenjoyment.lfnw.main.MainFeature;
 import com.appenjoyment.lfnw.main.MainFeatureInfo;
 import com.appenjoyment.utility.DisplayMetricsUtility;
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends ActionBarActivity implements IDrawerActivity
 {
 	public MainActivity()
 	{
@@ -59,7 +59,7 @@ public class MainActivity extends ActionBarActivity
 
 		setContentView(R.layout.activity_main);
 
-		mTitle = mDrawerTitle = getTitle();
+		mDrawerTitle = getTitle();
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -112,14 +112,21 @@ public class MainActivity extends ActionBarActivity
 		{
 			public void onDrawerClosed(View view)
 			{
-				getSupportActionBar().setTitle(mTitle);
 				supportInvalidateOptionsMenu();
+
+				IDrawerFragment drawerFragment = (IDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+				if (drawerFragment != null)
+					drawerFragment.onDrawerClosed();
 			}
 
 			public void onDrawerOpened(View drawerView)
 			{
 				getSupportActionBar().setTitle(mDrawerTitle);
 				supportInvalidateOptionsMenu();
+
+				IDrawerFragment drawerFragment = (IDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+				if (drawerFragment != null)
+					drawerFragment.onDrawerOpened();
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -195,7 +202,7 @@ public class MainActivity extends ActionBarActivity
 			fragment = AboutFragment.newInstance();
 			break;
 		case Register:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/node/2977/cod_registration");
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/node/2977/cod_registration", getResources().getString(featureInfo.TitleId));
 			break;
 		case Scan:
 			fragment = ScanBadgeFragment.newInstance();
@@ -204,10 +211,10 @@ public class MainActivity extends ActionBarActivity
 			fragment = SessionsFragment.newInstance();
 			break;
 		case Sponsors:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors");
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors", getResources().getString(featureInfo.TitleId));
 			break;
 		case Venue:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue");
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue", getResources().getString(featureInfo.TitleId));
 			break;
 		default:
 			break;
@@ -220,7 +227,6 @@ public class MainActivity extends ActionBarActivity
 			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
 			mDrawerList.setItemChecked(position, true);
-			setTitle(mFeatures[position].TitleId);
 		}
 
 		mDrawerLayout.closeDrawer(mDrawerList);
@@ -229,8 +235,7 @@ public class MainActivity extends ActionBarActivity
 	@Override
 	public void setTitle(CharSequence title)
 	{
-		mTitle = title;
-		getSupportActionBar().setTitle(mTitle);
+		getSupportActionBar().setTitle(title);
 	}
 
 	@Override
@@ -260,11 +265,16 @@ public class MainActivity extends ActionBarActivity
 		return super.onKeyDown(keyCode, event);
 	}
 
+	@Override
+	public boolean isDrawerOpen()
+	{
+		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
+	}
+
 	private final MainFeatureInfo[] mFeatures;
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private CharSequence mDrawerTitle;
-	private CharSequence mTitle;
 }

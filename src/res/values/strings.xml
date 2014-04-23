@@ -4,6 +4,8 @@
     <string name="app_name">LinuxFest Northwest 2014</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="sessions_navigation_year_format">%1$s sessions</string>
+    <string name="sessions_navigation_year_starred_format">Starred %1$s sessions</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_open_in_browser">Open in browser</string>
