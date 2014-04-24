@@ -209,7 +209,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			fragment = AboutFragment.newInstance();
 			break;
 		case Register:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/node/2977/cod_registration", getResources().getString(featureInfo.TitleId));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/2014", getResources().getString(featureInfo.TitleId));
 			break;
 		case Scan:
 			fragment = ScanBadgeFragment.newInstance();
