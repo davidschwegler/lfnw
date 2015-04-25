@@ -1,14 +1,21 @@
 package com.appenjoyment.lfnw;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Request;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -81,13 +88,24 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 		{
 			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 			{
-				// TODO:!
+				Log.w(TAG, "OnReceivedError: " + description + " url: " + failingUrl);
+			}
+			 
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				
+				if(HandleFileDownloadUri(url))
+					return true;
+				
+				return super.shouldOverrideUrlLoading(view, url);
 			}
 
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon)
 			{
 				super.onPageStarted(view, url, favicon);
+				Log.d(TAG, "OnPageStarted: " + url);
+				
 				m_isLoading = true;
 				m_swipeRefreshLayout.setRefreshing(true);
 			}
@@ -100,6 +118,29 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 				m_swipeRefreshLayout.setRefreshing(false);
 
 				CookieSyncManager.getInstance().sync();
+			}
+
+			@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+			private boolean HandleFileDownloadUri(String url) 
+			{
+				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && url.endsWith(".pdf"))
+				{
+					DownloadManager manager = (DownloadManager)getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+					
+					Uri uri = Uri.parse(url);
+					if(uri != null)
+					{					
+						Request request = new Request(uri);
+						int lastSlash = url.lastIndexOf('/');
+						request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, url.substring(lastSlash == -1 ? 0 : lastSlash));
+						request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+						manager.enqueue(request);
+						
+						return true;
+					}
+				}
+				
+				return false;
 			}
 		});
 
@@ -188,8 +229,9 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 		getActivity().supportInvalidateOptionsMenu();
 	}
 
-	private static String KEY_URL = "KEY_URL";
-	private static String KEY_TITLE = "KEY_TITLE";
+	private static final String TAG = WebViewFragment.class.getName();
+	private static final String KEY_URL = "KEY_URL";
+	private static final String KEY_TITLE = "KEY_TITLE";
 
 	private SwipeRefreshLayout m_swipeRefreshLayout;
 	private WebView m_webView;
