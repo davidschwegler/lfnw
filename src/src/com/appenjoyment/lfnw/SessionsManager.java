@@ -347,7 +347,8 @@ public final class SessionsManager
 		{
 			// v1: initial version
 			// v2: update with embedded 2014 data
-			if (oldVersion == 1)
+			// v3: update with embedded 2015 data
+			if (oldVersion == 1 || oldVersion == 2)
 				insertInitialData(db);
 		}
 	}

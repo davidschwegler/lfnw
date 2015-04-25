@@ -32,6 +32,7 @@ import android.util.Pair;
  * 	},
  * </pre>
  * 
+ * 
  * 2014
  * 
  * <pre>
@@ -48,9 +49,26 @@ import android.util.Pair;
  * 			}
  * 		},
  * </post>
+ * 
+ * 
+ * 2015
+ * 
+ * <pre>
+ * {
+ * 		node: {
+ * 			nid: "3403",
+ * 			title: "Developing for Android's Uniqueness",
+ * 			name: "G-103",
+ * 			day: "Sun, 27 Apr 2014",
+ * 			time: "1:30 PM to 2:20 PM",
+ * 			field_speakers: "David Schwegler",
+ * 			field_session_track: "Mobile Solutions",
+ * 			field_experience: "Intermediate"
+ * 			}
+ * 		},
+ * </post>
  */
-public class SessionData
-{
+public class SessionData {
 	public String day;
 	public String time;
 	public String title;
@@ -65,24 +83,22 @@ public class SessionData
 	// time: "1:30 PM to 2:20 PM",
 	// TODO: Timezone is always PST
 	@SuppressWarnings("deprecation")
-	public Pair<Date, Date> parseTimeSlotDateRange()
-	{
+	public Pair<Date, Date> parseTimeSlotDateRange() {
 		Date startTime = null;
 		Date endTime = null;
 
-		// in theory an event could be all-day, but there currently are none, so ignore that for now
+		// in theory an event could be all-day, but there currently are none, so
+		// ignore that for now
 		if (TextUtils.isEmpty(day) || TextUtils.isEmpty(time))
 			return null;
 
 		// day: "Sun, 27 Apr 2014",
-		SimpleDateFormat dateFormater = new SimpleDateFormat("EEEE, dd MMM yyyy", Locale.US);
+		SimpleDateFormat dateFormater = new SimpleDateFormat(
+				"EEEE, dd MMM yyyy", Locale.US);
 		Date parsedDay;
-		try
-		{
+		try {
 			parsedDay = dateFormater.parse(day);
-		}
-		catch (ParseException e)
-		{
+		} catch (ParseException e) {
 			return null;
 		}
 
@@ -95,72 +111,71 @@ public class SessionData
 			return null;
 
 		String startTimeString = timeStartEnd[0].trim();
-		SimpleDateFormat timeFormater = new SimpleDateFormat("h:mm a", Locale.US);
+		SimpleDateFormat timeFormater = new SimpleDateFormat("h:mm a",
+				Locale.US);
 		Date parsedStartTime;
-		try
-		{
+		try {
 			parsedStartTime = timeFormater.parse(startTimeString);
-		}
-		catch (ParseException e)
-		{
+		} catch (ParseException e) {
 			return null;
 		}
 
 		String endTimeString = timeStartEnd[1].trim();
 		Date parsedEndTime;
-		try
-		{
+		try {
 			parsedEndTime = timeFormater.parse(endTimeString);
-		}
-		catch (ParseException e)
-		{
+		} catch (ParseException e) {
 			return null;
 		}
 
-		startTime = new Date(parsedDay.getYear(), parsedDay.getMonth(), parsedDay.getDate(), parsedStartTime.getHours(), parsedStartTime.getMinutes());
-		endTime = new Date(parsedDay.getYear(), parsedDay.getMonth(), parsedDay.getDate(), parsedEndTime.getHours(), parsedEndTime.getMinutes());
+		startTime = new Date(parsedDay.getYear(), parsedDay.getMonth(),
+				parsedDay.getDate(), parsedStartTime.getHours(),
+				parsedStartTime.getMinutes());
+		endTime = new Date(parsedDay.getYear(), parsedDay.getMonth(),
+				parsedDay.getDate(), parsedEndTime.getHours(),
+				parsedEndTime.getMinutes());
 
 		return new Pair<Date, Date>(startTime, endTime);
 	}
 
-	public static List<SessionData> parseFromJson(String in)
-	{
-		try
-		{
+	public static List<SessionData> parseFromJson(String in) {
+		try {
 			List<SessionData> sessions = new ArrayList<SessionData>();
 
 			JSONObject containerObject = new JSONObject(in);
 
 			// list of sessions
 			JSONArray sessionsArray = containerObject.getJSONArray("nodes");
-			for (int index = 0; index < sessionsArray.length(); index++)
-			{
-				// ultra weird, but each item in the array is a json object containing a node, not the node itself...
-				JSONObject sessionContainerObject = (JSONObject) sessionsArray.get(index);
-				JSONObject sessionObject = (JSONObject) sessionContainerObject.get("node");
+			for (int index = 0; index < sessionsArray.length(); index++) {
+				// ultra weird, but each item in the array is a json object
+				// containing a node, not the node itself...
+				JSONObject sessionContainerObject = (JSONObject) sessionsArray
+						.get(index);
+				JSONObject sessionObject = (JSONObject) sessionContainerObject
+						.get("node");
 				sessions.add(parseSession(sessionObject));
 			}
 
 			return sessions;
-		}
-		catch (JSONException e)
-		{
-			// all-or-nothing for now...could be more lenient and skip failing sessions,
-			// but that could also lead to "dropping" a certain session and never knowing it
+		} catch (JSONException e) {
+			// all-or-nothing for now...could be more lenient and skip failing
+			// sessions,
+			// but that could also lead to "dropping" a certain session and
+			// never knowing it
 			Log.e(TAG, "Error parsing Sessions Json", e);
 			return null;
-		}
-		catch (ClassCastException e)
-		{
-			// all-or-nothing for now...could be more lenient and skip failing sessions,
-			// but that could also lead to "dropping" a certain session and never knowing it
+		} catch (ClassCastException e) {
+			// all-or-nothing for now...could be more lenient and skip failing
+			// sessions,
+			// but that could also lead to "dropping" a certain session and
+			// never knowing it
 			Log.e(TAG, "Error parsing Sessions Json", e);
 			return null;
 		}
 	}
 
-	private static SessionData parseSession(JSONObject sessionObject) throws JSONException
-	{
+	private static SessionData parseSession(JSONObject sessionObject)
+			throws JSONException {
 		SessionData session = new SessionData();
 
 		Object dayObject = sessionObject.get("day");
