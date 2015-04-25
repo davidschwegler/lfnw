@@ -83,7 +83,8 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 
 		CookieManager.getInstance().setAcceptCookie(true);
 		m_webView.getSettings().setJavaScriptEnabled(true);
-
+		setZoomSettings();
+		
 		m_webView.setWebViewClient(new WebViewClient()
 		{
 			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
@@ -152,6 +153,14 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 		m_webView.loadUrl(m_requestedUrl);
 
 		return m_swipeRefreshLayout;
+	}
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB) 
+	private void setZoomSettings() 
+	{
+		m_webView.getSettings().setBuiltInZoomControls(true);
+		if(Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
+			m_webView.getSettings().setDisplayZoomControls(false);
 	}
 
 	@Override
