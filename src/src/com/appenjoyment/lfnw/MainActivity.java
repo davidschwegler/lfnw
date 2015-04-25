@@ -209,7 +209,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			fragment = AboutFragment.newInstance();
 			break;
 		case Register:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/2014", getResources().getString(featureInfo.TitleId));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/2015", getResources().getString(featureInfo.TitleId));
 			break;
 		case Scan:
 			fragment = ScanBadgeFragment.newInstance();
@@ -218,10 +218,10 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			fragment = SessionsFragment.newInstance();
 			break;
 		case Sponsors:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/sponsors", getResources().getString(featureInfo.TitleId));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/2015/sponsors", getResources().getString(featureInfo.TitleId));
 			break;
 		case Venue:
-			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/information/venue", getResources().getString(featureInfo.TitleId));
+			fragment = WebViewFragment.newInstance("http://linuxfestnorthwest.org/2015/venue", getResources().getString(featureInfo.TitleId));
 			break;
 		default:
 			break;

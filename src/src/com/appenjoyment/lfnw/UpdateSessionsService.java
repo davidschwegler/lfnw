@@ -119,7 +119,7 @@ public class UpdateSessionsService extends Service
 			String json;
 			try
 			{
-				HttpGet request = new HttpGet(new URI("http://www.linuxfestnorthwest.org/2014/schedule/sessions.json"));
+				HttpGet request = new HttpGet(new URI("http://www.linuxfestnorthwest.org/2015/schedule/sessions.json"));
 				HttpResponse response = client.execute(request);
 
 				json = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
