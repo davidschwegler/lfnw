@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -180,6 +181,13 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	{
 		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
 	}
+	
+	@Override 
+	protected void onActivityResult(int arg0, int arg1, android.content.Intent arg2) 
+	{
+		Log.i(TAG, "OnActivityResult");
+		super.onActivityResult(arg0, arg1, arg2);
+	};
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
 	{
@@ -237,6 +245,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		}
 	}
 
+	private static final String TAG = MainActivity.class.getName();
 	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer";
 	private static final String PREFERENCES_NAME = "MainActivity";
 

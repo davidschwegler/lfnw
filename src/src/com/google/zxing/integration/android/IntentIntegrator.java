@@ -25,12 +25,14 @@ import java.util.Map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
 /**
@@ -162,6 +164,7 @@ public class IntentIntegrator
 	);
 
 	private final Activity activity;
+	private final Fragment fragment;
 	private String title;
 	private String message;
 	private String buttonYes;
@@ -169,9 +172,10 @@ public class IntentIntegrator
 	private List<String> targetApplications;
 	private final Map<String, Object> moreExtras;
 
-	public IntentIntegrator(Activity activity)
+	public IntentIntegrator(Activity activity, Fragment fragment)
 	{
 		this.activity = activity;
+		this.fragment = fragment;
 		title = DEFAULT_TITLE;
 		message = DEFAULT_MESSAGE;
 		buttonYes = DEFAULT_YES;
@@ -330,7 +334,10 @@ public class IntentIntegrator
 	 */
 	protected void startActivityForResult(Intent intent, int code)
 	{
-		activity.startActivityForResult(intent, code);
+		if(fragment != null)
+			fragment.startActivityForResult(intent, code);
+		else
+			activity.startActivityForResult(intent, code);
 	}
 
 	private String findTargetAppPackage(Intent intent)
