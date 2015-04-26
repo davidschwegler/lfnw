@@ -3,14 +3,26 @@ package com.appenjoyment.lfnw;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -20,6 +32,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -37,9 +51,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.appenjoyment.utility.CsvUtility;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
 
@@ -85,6 +101,12 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 	{
 		super.onDestroy();
 		getActivity().unregisterReceiver(m_updateScannedBadgesReceiver);
+		
+		if(m_downloadVcfTask != null)
+		{
+			m_downloadVcfTask.cancel(false);
+			m_downloadVcfTask = null;
+		}
 	}
 
 	@Override
@@ -100,9 +122,13 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 		switch (item.getItemId())
 		{
 		case R.id.menu_scan_badge:
-			IntentIntegrator scannerIntent = new IntentIntegrator(getActivity());
-			scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
-			return true;
+			if(m_downloadVcfTask == null)
+			{			
+				IntentIntegrator scannerIntent = new IntentIntegrator(getActivity(), this);
+				scannerIntent.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+				return true;
+			}
+			break;
 		case R.id.menu_scan_badge_export:
 			exportToCsv();
 			return true;
@@ -116,29 +142,31 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 		if (scanResult != null)
 		{
+			Log.d(TAG, "ScanResult: " + scanResult.toString());
 			boolean success = false;
-			if (!TextUtils.isEmpty(scanResult.getContents()))
+			String contents = scanResult.getContents();
+			if (!TextUtils.isEmpty(contents))
 			{
-				VCard vcard = Ezvcard.parse(scanResult.getContents()).first();
-				if (vcard != null)
+				Uri uri = Uri.parse(contents);
+				if(uri != null && (uri.getScheme().equals("http") || uri.getScheme().equals("https")))
 				{
-					BadgeContactData contact = VCardBadgeContactUtility.parseBadgeContact(vcard);
-					if (contact != null)
+					Log.i(TAG, "Found http uri");
+					if(uri.getSchemeSpecificPart().endsWith(".vcf"))
 					{
-						ScannedBadgeData scannedBadge = new ScannedBadgeData();
-						scannedBadge.contactData = contact;
-						scannedBadge.dateScanned = new Date().getTime();
-						ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
+						Log.i(TAG, "Found uri to vcf, attempting download");
+						m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(uri).execute();
 						success = true;
 					}
 				}
+				else
+				{				
+					Log.i(TAG, "Attempting to insert as VCF data");
+					success = insertRawVcfBadge(contents);
+				}
 			}
-
-			if (!success)
-			{
-				Log.e(TAG, "vcard failed to parse");
+			
+			if(!success)
 				Toast.makeText(getActivity(), "No contact found", Toast.LENGTH_SHORT).show();
-			}
 		}
 		else
 		{
@@ -157,6 +185,30 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 	{
 		getActivity().setTitle(R.string.scan_badge_title);
 		getActivity().supportInvalidateOptionsMenu();
+	}
+	
+	private boolean insertRawVcfBadge(String contents)
+	{
+		Log.i(TAG, "Inserting " + contents);
+		VCard vcard = Ezvcard.parse(contents).first();
+		if (vcard != null)
+		{
+			Log.i(TAG, "Parsed ezvcard");
+			BadgeContactData contact = VCardBadgeContactUtility.parseBadgeContact(vcard);
+			if (contact != null)
+			{
+				Log.i(TAG, "Parsed Vcf badge");
+				ScannedBadgeData scannedBadge = new ScannedBadgeData();
+				scannedBadge.contactData = contact;
+				scannedBadge.dateScanned = new Date().getTime();
+				ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
+				return true;
+			}
+		}
+
+		Log.i(TAG, "Failed to parse vcard");
+		
+		return false;
 	}
 
 	@SuppressLint("WorldReadableFiles")
@@ -405,9 +457,138 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 			if (intent.getAction().equals(ScannedBadgesManager.UPDATED_SCANNED_BADGES_ACTION))
 				m_adapter.getCursor().requery();
 		}
+	}	
+
+	private final class DownloadVcfTask extends AsyncTask<Void, Void, String>
+	{
+		public DownloadVcfTask(Uri uri)
+		{
+			m_uri = uri;
+		}
+		
+		@Override
+		protected void onPreExecute() 
+		{
+			m_downloadVcfDialog = new ProgressDialog(getActivity());
+			m_downloadVcfDialog.setMessage(getResources().getString(R.string.scan_badge_downloading_contact));
+			m_downloadVcfDialog.setCancelable(false);
+			m_downloadVcfDialog.setCanceledOnTouchOutside(false);
+			m_downloadVcfDialog.show();
+		}
+		
+		@Override
+		protected String doInBackground(Void... params)
+		{
+			Log.i(TAG, "Starting vcf download");			
+			return doDownload(m_uri.toString(), 0);
+		}
+
+		private String doDownload(String url, int redirectCount) 
+		{
+			// load the stream into a string
+			String userAgent = System.getProperty("http.agent");
+			AndroidHttpClient client = AndroidHttpClient.newInstance(userAgent);
+			InputStream inputStream = null;
+			try
+			{
+				HttpGet request = new HttpGet(new URI(url));
+				HttpResponse response = client.execute(request);
+				
+				// handle redirect
+				int statusCode = response.getStatusLine().getStatusCode();
+				Log.w(TAG, "Got status code " + statusCode);
+				if (statusCode == HttpStatus.SC_OK) 
+				{
+					return EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+				}
+				else
+				{
+					if(redirectCount >= 4)
+					{
+						Log.e(TAG, "Reached redirect limit");
+						return null;
+					}
+					
+				    Header[] headers = response.getHeaders("Location");
+
+				    if (headers != null && headers.length != 0) 
+				    {
+				    	String newUrl = headers[headers.length - 1].getValue();
+				    	
+						Log.w(TAG, "Got redirect location url " + newUrl);
+				        
+				        // call again the same downloading method with new URL
+				        return doDownload(newUrl, redirectCount + 1);
+				    } 
+				    else 
+				    {
+						Log.w(TAG, "No redirect location url");
+				        return null;
+				    }
+				}
+			}
+			catch (IOException e)
+			{
+				Log.w(TAG, "IOException while getting vcf stream", e);
+				return null;
+			}
+			catch (URISyntaxException e)
+			{
+				Log.w(TAG, "URISyntaxException for vcf - should never happen", e);
+				return null;
+			}
+			finally
+			{
+				client.close();
+				try
+				{
+					if (inputStream != null)
+						inputStream.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+
+		@Override
+		protected void onPostExecute(String result)
+		{
+			if(!isCancelled())
+			{
+				Log.i(TAG, "Finished vcf download success=" + (result == null ? "false": "true"));
+				m_downloadVcfDialog.dismiss();
+				m_downloadVcfDialog = null;
+				m_downloadVcfTask = null;
+				
+				if(result != null)
+				{
+					insertRawVcfBadge(result);
+				}
+				else
+				{
+					new AlertDialog.Builder(getActivity())
+					.setMessage(R.string.scan_badge_download_contact_failed)
+					.setNeutralButton("Cancel", null)
+					.setPositiveButton("Retry", new DialogInterface.OnClickListener() 
+					{						
+						@Override
+						public void onClick(DialogInterface dialog, int which) 
+						{
+							m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri).execute();
+						}
+					})
+					.show();
+				}
+			}
+		}
+
+		private final Uri m_uri;
+		private ProgressDialog m_downloadVcfDialog;
 	}
 
 	private UpdateScannedBadgesReceiver m_updateScannedBadgesReceiver;
 	private ScannedBadgesAdapter m_adapter;
+	private DownloadVcfTask m_downloadVcfTask;
 	private static final String TAG = "ScanBadgeFragment";
 }
