@@ -202,6 +202,8 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				scannedBadge.contactData = contact;
 				scannedBadge.dateScanned = new Date().getTime();
 				ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
+				
+				Toast.makeText(getActivity(), "Added contact", Toast.LENGTH_SHORT).show();
 				return true;
 			}
 		}
