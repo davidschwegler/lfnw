@@ -36,6 +36,7 @@ import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
@@ -226,13 +227,21 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 			// create the CSV
 			boolean success = true;
 			String csvFileName = "ScannedBadges-" + new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.US).format(new Date()) + ".csv";
+			File appDirectory = new File(Environment.getExternalStorageDirectory(), "LinuxFest Northwest");
+			File csvFile = new File(appDirectory, csvFileName);
 			try
 			{
-				// I think we want this world-readable here, as otherwise external apps we send it to wouldn't have access to our cache directory
-				@SuppressWarnings("deprecation")
-				FileOutputStream stream = getActivity().openFileOutput(csvFileName, Context.MODE_WORLD_READABLE);
-				stream.write(csvString.getBytes());
-				stream.close();
+				if(!appDirectory.exists() && !appDirectory.mkdirs())
+				{
+					Log.e(TAG, "Couldn't mkdirs for " + appDirectory.getAbsolutePath());
+					success = false;
+				}
+				else
+				{
+					FileOutputStream stream = new FileOutputStream(csvFile);
+					stream.write(csvString.getBytes());
+					stream.close();
+				}
 			}
 			catch (IOException e)
 			{
@@ -240,12 +249,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				e.printStackTrace();
 			}
 
-			// email it
+			// share it
 			if (success)
 			{
 				Intent intent = new Intent(Intent.ACTION_SEND);
 				intent.setType("text/plain");
-				File csvFile = new File(getActivity().getFilesDir(), csvFileName);
 				intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(csvFile));
 				try
 				{
