@@ -569,12 +569,29 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				{
 					new AlertDialog.Builder(getActivity())
 					.setMessage(R.string.scan_badge_download_contact_failed)
-					.setNeutralButton("Cancel", null)
+					.setNeutralButton("Cancel", new DialogInterface.OnClickListener() 
+					{						
+						@Override
+						public void onClick(DialogInterface dialog, int which) 
+						{
+							Log.i(TAG, "Inserting url to vcf badge");
+							BadgeContactData contact = new BadgeContactData();
+							contact.firstName = m_uri.toString();
+							
+							ScannedBadgeData scannedBadge = new ScannedBadgeData();
+							scannedBadge.contactData = contact;
+							scannedBadge.dateScanned = new Date().getTime();
+							ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
+							
+							Toast.makeText(getActivity(), "Added url of contact's vcard", Toast.LENGTH_SHORT).show();
+						}
+					})
 					.setPositiveButton("Retry", new DialogInterface.OnClickListener() 
 					{						
 						@Override
 						public void onClick(DialogInterface dialog, int which) 
 						{
+							Log.i(TAG, "Retrying...");
 							m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri).execute();
 						}
 					})
