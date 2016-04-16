@@ -67,6 +67,24 @@ import android.util.Pair;
  * 			}
  * 		},
  * </post>
+ *
+ *
+ * 2016
+ *
+ * <pre>
+ * {
+ * 		node: {
+ * 			nid: "3403",
+ * 			title: "Developing for Android's Uniqueness",
+ * 			name: "G-103",
+ * 			day: "Sun, 27 Apr 2014",
+ * 			time: "1:30 PM to 2:20 PM",
+ * 			field_speakers: "David Schwegler",
+ * 			field_session_track: "Mobile Solutions",
+ * 			field_experience: "Intermediate"
+ * 			}
+ * 		},
+ * </post>
  */
 public class SessionData {
 	public String day;
@@ -203,9 +221,12 @@ public class SessionData {
 		if (experienceLevelObject instanceof String)
 			session.experienceLevel = (String) experienceLevelObject;
 
-		Object trackObject = sessionObject.get("field_session_track");
-		if (trackObject instanceof String)
-			session.track = (String) trackObject;
+		if(sessionObject.has("field_session_track"))
+		{
+			Object trackObject = sessionObject.get("field_session_track");
+			if (trackObject instanceof String)
+				session.track = (String) trackObject;
+		}
 
 		Object speakersObject = sessionObject.get("field_speakers");
 		if (speakersObject instanceof String)

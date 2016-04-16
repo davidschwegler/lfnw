@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.appenjoyment.lfnw"
     android:versionCode="7"
-    android:versionName="2.1.2" >
+    android:versionName="3.0.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -28,7 +28,8 @@
         <activity
             android:name="com.appenjoyment.lfnw.WebViewActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
-        <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
+
+        <service android:name="com.appenjoyment.lfnw.UpdateSessionsService" />
     </application>
 
 </manifest>

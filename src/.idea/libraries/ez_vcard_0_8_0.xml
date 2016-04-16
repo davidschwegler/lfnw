@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="ez-vcard-0.8.0">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/ez-vcard-0.8.0.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

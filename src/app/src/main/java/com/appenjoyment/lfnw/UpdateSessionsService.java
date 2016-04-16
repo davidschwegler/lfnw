@@ -1,23 +1,29 @@
 package com.appenjoyment.lfnw;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
+
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.Pair;
+
+import com.appenjoyment.utility.HttpUtility;
+import com.appenjoyment.utility.StreamUtility;
 
 public class UpdateSessionsService extends Service
 {
@@ -113,43 +119,12 @@ public class UpdateSessionsService extends Service
 			sendBroadcast(new Intent(UPDATE_STARTED_ACTION));
 
 			// load the json stream into a string
-			String userAgent = System.getProperty("http.agent");
-			AndroidHttpClient client = AndroidHttpClient.newInstance(userAgent);
-			InputStream inputStream = null;
-			String json;
-			try
-			{
-				HttpGet request = new HttpGet(new URI("http://www.linuxfestnorthwest.org/2015/sessions.json"));
-				HttpResponse response = client.execute(request);
-
-				json = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-			}
-			catch (IOException e)
-			{
-				Log.w(TAG, "IOException while getting content stream", e);
+			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule.json");
+			if(!jsonResult.first)
 				return false;
-			}
-			catch (URISyntaxException e)
-			{
-				Log.w(TAG, "Should never happen", e);
-				return false;
-			}
-			finally
-			{
-				client.close();
-				try
-				{
-					if (inputStream != null)
-						inputStream.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
 
 			// parse the json
-			List<SessionData> sessionData = SessionData.parseFromJson(json);
-
+			List<SessionData> sessionData = SessionData.parseFromJson(jsonResult.second);
 			if (sessionData == null)
 				return false;
 
@@ -171,12 +146,11 @@ public class UpdateSessionsService extends Service
 				SharedPreferences prefs = getSharedPreferences("UpdateSessionsService", MODE_PRIVATE);
 				prefs.edit().putLong(PREF_LAST_SUCCESSFUL_UPDATE, new Date().getTime()).commit();
 				Log.i(TAG, "Finished sessions list update success=true");
-			}
-			else
+			} else
 			{
 				Log.i(TAG, "Finished sessions list update success=false");
 			}
-			
+
 			sendBroadcast(new Intent(UPDATE_COMPLETED_ACTION));
 		}
 
