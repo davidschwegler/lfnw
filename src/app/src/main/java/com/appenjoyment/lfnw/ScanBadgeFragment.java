@@ -503,11 +503,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 			{
 				HttpGet request = new HttpGet(new URI(url));
 				HttpResponse response = client.execute(request);
-				
+
 				// handle redirect
 				int statusCode = response.getStatusLine().getStatusCode();
 				Log.w(TAG, "Got status code " + statusCode);
-				if (statusCode == HttpStatus.SC_OK) 
+				if (statusCode == HttpStatus.SC_OK)
 				{
 					return EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
 				}
@@ -518,19 +518,19 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 						Log.e(TAG, "Reached redirect limit");
 						return null;
 					}
-					
+
 				    Header[] headers = response.getHeaders("Location");
 
-				    if (headers != null && headers.length != 0) 
+				    if (headers != null && headers.length != 0)
 				    {
 				    	String newUrl = headers[headers.length - 1].getValue();
-				    	
+
 						Log.w(TAG, "Got redirect location url " + newUrl);
-				        
+
 				        // call again the same downloading method with new URL
 				        return doDownload(newUrl, redirectCount + 1);
-				    } 
-				    else 
+				    }
+				    else
 				    {
 						Log.w(TAG, "No redirect location url");
 				        return null;
