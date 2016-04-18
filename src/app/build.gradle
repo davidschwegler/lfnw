@@ -21,5 +21,6 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:23.3.0'
     compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
     compile 'com.googlecode.ez-vcard:ez-vcard:0.9.9'
 }

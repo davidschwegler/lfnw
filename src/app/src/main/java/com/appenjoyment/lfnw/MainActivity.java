@@ -3,6 +3,7 @@ package com.appenjoyment.lfnw;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -25,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.appenjoyment.lfnw.main.MainFeature;
 import com.appenjoyment.lfnw.main.MainFeatureInfo;
+import com.appenjoyment.lfnw.signin.SignInActivity;
 import com.appenjoyment.utility.DisplayMetricsUtility;
 
 public class MainActivity extends ActionBarActivity implements IDrawerActivity
@@ -32,6 +34,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	public MainActivity()
 	{
 		List<MainFeatureInfo> features = new ArrayList<MainFeatureInfo>();
+		features.add(new MainFeatureInfo(MainFeature.SignIn, R.string.sign_in_title, R.drawable.ic_sessions_calendar_blank));
 		features.add(new MainFeatureInfo(MainFeature.Sessions, R.string.sessions_title, R.drawable.ic_sessions_calendar_blank));
 		features.add(new MainFeatureInfo(MainFeature.Scan, R.string.scan_badge_title, R.drawable.ic_scan_contact));
 		features.add(new MainFeatureInfo(MainFeature.Venue, R.string.venue_title, R.drawable.ic_venue_place));
@@ -129,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		if (savedInstanceState == null)
-			doSelectItem(0);
+			doSelectItem(DEFAULT_FEATURE_INDEX);
 
 		if (!getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_USER_CLOSED_DRAWER, false))
 			mDrawerLayout.openDrawer(GravityCompat.START);
@@ -181,13 +184,19 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	{
 		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
 	}
-	
-	@Override 
-	protected void onActivityResult(int arg0, int arg1, android.content.Intent arg2) 
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		Log.i(TAG, "OnActivityResult");
-		super.onActivityResult(arg0, arg1, arg2);
-	};
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == SIGN_IN_REQUEST && resultCode == RESULT_OK)
+		{
+			// restart activity
+			finish();
+			startActivity(new Intent(MainActivity.this, MainActivity.class));
+		}
+	}
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
 	{
@@ -225,6 +234,9 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		case Sessions:
 			fragment = SessionsFragment.newInstance();
 			break;
+		case SignIn:
+			startActivityForResult(new Intent(MainActivity.this, SignInActivity.class), SIGN_IN_REQUEST);
+			break;
 		case Sponsors:
 			fragment = WebViewFragment.newInstance("https://www.linuxfestnorthwest.org/2016/sponsors", getResources().getString(featureInfo.TitleId));
 			break;
@@ -248,6 +260,8 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	private static final String TAG = MainActivity.class.getName();
 	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer";
 	private static final String PREFERENCES_NAME = "MainActivity";
+	private static final int DEFAULT_FEATURE_INDEX = 1;
+	private static final int SIGN_IN_REQUEST = 1;
 
 	private final MainFeatureInfo[] mFeatures;
 

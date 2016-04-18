@@ -1,11 +1,15 @@
 package com.appenjoyment.utility;
 
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 
 public class HttpUtility
@@ -29,16 +33,16 @@ public class HttpUtility
 		if (url == null)
 			return Pair.create(false, null);
 
-		String json;
+		String result;
 		HttpURLConnection urlConnection = null;
 		try
 		{
 			urlConnection = (HttpURLConnection) url.openConnection();
-			json = StreamUtility.readAsString(urlConnection.getInputStream());
+			result = StreamUtility.readAsString(urlConnection.getInputStream());
 		}
 		catch (IOException e)
 		{
-			Log.w(TAG, "IOException while getting content stream", e);
+			Log.w(TAG, "getStringResponse: IOException", e);
 			return Pair.create(false, null);
 		}
 		finally
@@ -47,7 +51,70 @@ public class HttpUtility
 				urlConnection.disconnect();
 		}
 
-		return Pair.create(true, json);
+		return Pair.create(true, result);
+	}
+
+	public static class StringResponse
+	{
+		public int responseCode;
+
+		public String result;
+	}
+
+	public static StringResponse sendPost(String urlString, String postContent)
+	{
+		URL url = createURL(urlString);
+		if (url == null)
+			return null;
+
+		StringResponse response = new StringResponse();
+
+		HttpURLConnection urlConnection = null;
+		try
+		{
+			urlConnection = (HttpURLConnection) url.openConnection();
+			//			conn.setReadTimeout( 10000 /*milliseconds*/ );
+			//			conn.setConnectTimeout( 15000 /* milliseconds */ );
+
+			try
+			{
+				urlConnection.setRequestMethod("POST");
+			}
+			catch(ProtocolException e)
+			{
+				// will never happen
+			}
+
+			urlConnection.setDoOutput(true);
+			urlConnection.setFixedLengthStreamingMode(postContent.getBytes().length);
+			urlConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+			urlConnection.connect();
+
+			StreamUtility.writeString(urlConnection.getOutputStream(), postContent);
+
+			response.result = StreamUtility.readAsString(urlConnection.getInputStream());
+			response.responseCode = urlConnection.getResponseCode();
+		}
+		catch (IOException e)
+		{
+			Log.w(TAG, "sendPost: IOException", e);
+			try
+			{
+				response.responseCode = urlConnection.getResponseCode();
+			}
+			catch (IOException e2)
+			{
+				Log.w(TAG, "sendPost: IOException getting response code after IOException - should never happen", e2);
+				return null;
+			}
+		}
+		finally
+		{
+			if (urlConnection != null)
+				urlConnection.disconnect();
+		}
+
+		return response;
 	}
 
 	private static final String TAG = "HttpUtility";

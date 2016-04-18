@@ -1,9 +1,12 @@
 package com.appenjoyment.utility;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class StreamUtility
 {
@@ -18,5 +21,12 @@ public class StreamUtility
 		}
 
 		return sb.toString();
+	}
+
+	public static void writeString(OutputStream stream, String value) throws IOException
+	{
+		BufferedWriter br = new BufferedWriter(new OutputStreamWriter(stream));
+		br.write(value);
+		br.flush();
 	}
 }

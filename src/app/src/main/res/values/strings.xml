@@ -19,6 +19,7 @@
     <string name="menu_scan_badge">Scan badge</string>
     <string name="about_version">Version</string>
     <string name="about_support_email">Email</string>
+    <string name="sign_in_title">Sign in</string>
     <string name="sessions_room_prefix">Room</string>
     <string name="support_email_subject_prefix">Contact</string>
     <string name="sessions_title">Sessions</string>
