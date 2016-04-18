@@ -118,8 +118,9 @@ public class UpdateSessionsService extends Service
 			Log.i(TAG, "Starting sessions list update");
 			sendBroadcast(new Intent(UPDATE_STARTED_ACTION));
 
-			Pair<Boolean, String> test = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule/mine.json");
-			Log.w(TAG, "Mine s=" + test.first + ", v=" + test.second);
+			// TODO: hook into "my sessions'
+//			Pair<Boolean, String> test = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule/mine.json");
+//			Log.w(TAG, "Mine s=" + test.first + ", v=" + test.second);
 
 			// load the json stream into a string
 			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule.json");
