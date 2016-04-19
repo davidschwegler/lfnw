@@ -1,6 +1,8 @@
 .settings
 .gradle
 .idea
+*.iml
 bin/
 gen/
 build/
+local.properties
