@@ -154,9 +154,9 @@ public class SignInActivity extends AppCompatActivity
 		String email = m_emailText.getText().toString();
 		String password = m_passwordText.getText().toString();
 
-		if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
+		if (email.isEmpty())
 		{
-			m_emailText.setError("enter a valid email address");
+			m_emailText.setError("enter a username or email");
 			valid = false;
 		}
 		else

@@ -54,6 +54,33 @@ public class HttpUtility
 		return Pair.create(true, result);
 	}
 
+	public static Pair<Boolean, byte[]> getByteResponse(String urlString)
+	{
+		URL url = createURL(urlString);
+		if (url == null)
+			return Pair.create(false, null);
+
+		byte[] result;
+		HttpURLConnection urlConnection = null;
+		try
+		{
+			urlConnection = (HttpURLConnection) url.openConnection();
+			result = StreamUtility.readAsBytes(urlConnection.getInputStream());
+		}
+		catch (IOException e)
+		{
+			Log.w(TAG, "getByteResponse: IOException", e);
+			return Pair.create(false, null);
+		}
+		finally
+		{
+			if (urlConnection != null)
+				urlConnection.disconnect();
+		}
+
+		return Pair.create(true, result);
+	}
+
 	public static class StringResponse
 	{
 		public int responseCode;

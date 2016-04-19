@@ -1,15 +1,16 @@
 package com.appenjoyment.lfnw.accounts;
 
 import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * E.g.
- *
+ * <p/>
  * 2016
- *
+ * <p/>
  * <pre>
  * {
  * "sessid": "F2FBqnQVzlr5fXMJF1NSu-Ug7AS9ZjIJ6PtmdPB1PQk",
@@ -63,9 +64,10 @@ public class SignInResponseData
 			response.user.userName = userObject.getString("name");
 			response.user.email = userObject.getString("mail");
 
-			// TODO: cleanup backslashes in url
 			JSONObject pictureObject = userObject.getJSONObject("picture");
 			response.user.avatarUrl = pictureObject.getString("url");
+			if (response.user.avatarUrl != null)
+				response.user.avatarUrl = response.user.avatarUrl.replace("\\/", "/");
 
 			JSONObject firstNameObject = userObject.getJSONObject("field_profile_first");
 			JSONArray firstNameArray = firstNameObject.getJSONArray("und");

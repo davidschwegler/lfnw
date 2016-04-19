@@ -57,16 +57,10 @@ public final class AccountManager
 		setupCookies(account);
 	}
 
-	private void setupCookies(Account account)
+	public boolean isSignedIn()
 	{
-		String domain = ".linuxfestnorthwest.org";
-		HttpCookie cookie = new HttpCookie(account.sessionName, account.sessionId);
-		cookie.setDomain(domain);
-
-		// setVersion(0) is required for linuxfestnorthwest.org to work, probably for the reasons described at
-		// Sessions With Cookies on http://developer.android.com/reference/java/net/HttpURLConnection.html
-		cookie.setVersion(0);
-		((CookieManager) CookieHandler.getDefault()).getCookieStore().add(null, cookie);
+		SharedPreferences prefs = OurApp.getInstance().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+		return prefs.contains("SessionId");
 	}
 
 	public Account getAccount()
@@ -86,7 +80,7 @@ public final class AccountManager
 	public User getUser()
 	{
 		SharedPreferences prefs = OurApp.getInstance().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
-		if (prefs.contains("UserId"))
+		if (!prefs.contains("UserId"))
 			return null;
 
 		User user = new User();
@@ -98,6 +92,18 @@ public final class AccountManager
 		user.avatarUrl = prefs.getString("AvatarUrl", null);
 
 		return user;
+	}
+
+	private void setupCookies(Account account)
+	{
+		String domain = ".linuxfestnorthwest.org";
+		HttpCookie cookie = new HttpCookie(account.sessionName, account.sessionId);
+		cookie.setDomain(domain);
+
+		// setVersion(0) is required for linuxfestnorthwest.org to work, probably for the reasons described at
+		// Sessions With Cookies on http://developer.android.com/reference/java/net/HttpURLConnection.html
+		cookie.setVersion(0);
+		((CookieManager) CookieHandler.getDefault()).getCookieStore().add(null, cookie);
 	}
 
 	private static final String TAG = "AccountManager";

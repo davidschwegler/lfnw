@@ -12,12 +12,12 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="6dp"
-            android:background="@drawable/site_background_dark_repeat" />
+            android:background="@color/site_background_dark" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="#FFFCA300" />
+            android:background="@color/accent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -61,6 +61,12 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/about_licenses"
                 android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/license_circular_image_view" />
 
             <TextView
                 android:layout_width="wrap_content"

@@ -6,12 +6,12 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:background="@drawable/site_background_dark_repeat" />
+        android:background="@color/site_background_dark" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="3dp"
-        android:background="#FFFCA300" />
+        android:background="@color/accent" />
 
     <FrameLayout
         android:layout_width="match_parent"

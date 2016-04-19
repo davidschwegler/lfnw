@@ -6,7 +6,6 @@ public enum MainFeature
 	Register,
 	Scan,
 	Sessions,
-	SignIn,
 	Sponsors,
 	Venue
 }
