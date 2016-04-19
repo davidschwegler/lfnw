@@ -452,7 +452,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	}
 
 	private static final String TAG = MainActivity.class.getName();
-	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer";
+	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer2016";
 	private static final String PREFERENCES_NAME = "MainActivity";
 	private static final int DEFAULT_FEATURE_INDEX = 0;
 	private static final int SIGN_IN_REQUEST = 1;
