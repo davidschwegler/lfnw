@@ -2,6 +2,7 @@ package com.appenjoyment.lfnw;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersAdapter;
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersListView;
 
@@ -161,6 +163,11 @@ public class SessionsListFragment extends Fragment
 			}
 
 			String track = cursor.getString(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_TRACK));
+
+			// TODO: literal string
+			if (cursor.getInt(cursor.getColumnIndex(SessionsManager.Sessions.COLUMN_NAME_IS_BOF)) == 1 && TextUtils.isEmpty(track))
+				track = "Birds of a Feather";
+
 			if (!TextUtils.isEmpty(track))
 			{
 				if (subtitle.length() != 0)

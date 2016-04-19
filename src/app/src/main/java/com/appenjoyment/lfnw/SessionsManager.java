@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +17,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
+
 import com.appenjoyment.utility.ArrayUtility;
+import com.appenjoyment.utility.StreamUtility;
+
+import ezvcard.util.IOUtils;
 
 /**
  * Maintains the sessions and user state about them.
@@ -43,6 +48,7 @@ public final class SessionsManager
 		public static final String COLUMN_NAME_EXPERIENCE_LEVEL = "Experience";
 		public static final String COLUMN_NAME_TRACK = "Track";
 		public static final String COLUMN_NAME_STARRED = "Starred";
+		public static final String COLUMN_NAME_IS_BOF = "IsBof";
 
 		private Sessions()
 		{
@@ -52,13 +58,13 @@ public final class SessionsManager
 	/**
 	 * The rows returned when returning all sessions.
 	 */
-	public static final String[] ALL_SESSIONS_ROWS = new String[] { Sessions._ID, Sessions.COLUMN_NAME_NODE_ID, Sessions.COLUMN_NAME_TITLE,
+	public static final String[] ALL_SESSIONS_ROWS = new String[]{Sessions._ID, Sessions.COLUMN_NAME_NODE_ID, Sessions.COLUMN_NAME_TITLE,
 			Sessions.COLUMN_NAME_ROOM, Sessions.COLUMN_NAME_START_TIME, Sessions.COLUMN_NAME_END_TIME, Sessions.COLUMN_NAME_SPEAKERS,
-			Sessions.COLUMN_NAME_EXPERIENCE_LEVEL, Sessions.COLUMN_NAME_TRACK, Sessions.COLUMN_NAME_STARRED };
+			Sessions.COLUMN_NAME_EXPERIENCE_LEVEL, Sessions.COLUMN_NAME_TRACK, Sessions.COLUMN_NAME_STARRED, Sessions.COLUMN_NAME_IS_BOF};
 
 	/**
 	 * Returns the static instance of this manager.
-	 * <p>
+	 * <p/>
 	 * TODO: Expose this as a content provider, so this isn't needed?
 	 */
 	public synchronized static SessionsManager getInstance(Context context)
@@ -80,7 +86,7 @@ public final class SessionsManager
 	{
 		// get all the session start times (small list)
 		Cursor cursor = query(true, Sessions.TABLE_NAME,
-				new String[] { Sessions.COLUMN_NAME_START_TIME }, null, null,
+				new String[]{Sessions.COLUMN_NAME_START_TIME}, null, null,
 				Sessions.COLUMN_NAME_START_TIME, null,
 				Sessions.COLUMN_NAME_START_TIME + " desc", null);
 
@@ -110,7 +116,7 @@ public final class SessionsManager
 	{
 		// get all the session start times (small list)
 		Cursor cursor = query(true, Sessions.TABLE_NAME,
-				new String[] { Sessions.COLUMN_NAME_START_TIME }, starredOnly ? Sessions.COLUMN_NAME_STARRED + "=1" : null, null,
+				new String[]{Sessions.COLUMN_NAME_START_TIME}, starredOnly ? Sessions.COLUMN_NAME_STARRED + "=1" : null, null,
 				Sessions.COLUMN_NAME_START_TIME, null,
 				Sessions.COLUMN_NAME_START_TIME, null);
 
@@ -144,14 +150,14 @@ public final class SessionsManager
 
 		// all sessions which start before midnight tonight and end after midnight this morning, ordered by the start time then the end time
 		return query(false, Sessions.TABLE_NAME, ALL_SESSIONS_ROWS, Sessions.COLUMN_NAME_START_TIME + " < ? AND " + Sessions.COLUMN_NAME_END_TIME + " > ?" +
-				(starredOnly ? " AND " + Sessions.COLUMN_NAME_STARRED + "=1" : ""),
-				new String[] { String.valueOf(timeMidnightPM), String.valueOf(timeMidnightAM) }, null, null,
+						(starredOnly ? " AND " + Sessions.COLUMN_NAME_STARRED + "=1" : ""),
+				new String[]{String.valueOf(timeMidnightPM), String.valueOf(timeMidnightAM)}, null, null,
 				Sessions.COLUMN_NAME_START_TIME + ", " + Sessions.COLUMN_NAME_END_TIME + "," + Sessions.COLUMN_NAME_TITLE, null);
 	}
 
 	/**
 	 * Sets whether a session is starred.
-	 * 
+	 *
 	 * @return True if the session existed and the state was set.
 	 */
 	public boolean starSession(long rowId, boolean starred)
@@ -164,7 +170,7 @@ public final class SessionsManager
 			ContentValues values = new ContentValues();
 			values.put(Sessions.COLUMN_NAME_STARRED, starred);
 
-			int rows = db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[] { String.valueOf(rowId) });
+			int rows = db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[]{String.valueOf(rowId)});
 
 			success = rows > 0;
 			db.setTransactionSuccessful();
@@ -179,12 +185,12 @@ public final class SessionsManager
 
 	/**
 	 * Generic API for querying the database.
-	 * 
+	 *
 	 * @see SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String)
 	 */
 	public Cursor query(boolean distinct, String table, String[] columns,
-			String selection, String[] selectionArgs, String groupBy,
-			String having, String orderBy, String limit)
+						String selection, String[] selectionArgs, String groupBy,
+						String having, String orderBy, String limit)
 	{
 		SQLiteDatabase db = m_dbHelper.getReadableDatabase();
 		return db.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
@@ -223,20 +229,21 @@ public final class SessionsManager
 				values.put(Sessions.COLUMN_NAME_TRACK, session.track);
 				values.put(Sessions.COLUMN_NAME_START_TIME, dateRange.first.getTime());
 				values.put(Sessions.COLUMN_NAME_END_TIME, dateRange.second.getTime());
+				values.put(Sessions.COLUMN_NAME_IS_BOF, session.isBof);
 
 				// TODO: do this better
 				values.put(Sessions.COLUMN_NAME_SPEAKERS, ArrayUtility.join(", ", Arrays.asList(session.speakers)));
 
 				// look for a row that already exists
 				Long rowId = null;
-				Cursor cursorExisting = db.query(Sessions.TABLE_NAME, new String[] { Sessions._ID }, Sessions.COLUMN_NAME_NODE_ID + "=?",
-						new String[] { session.nodeId }, null, null, null);
+				Cursor cursorExisting = db.query(Sessions.TABLE_NAME, new String[]{Sessions._ID}, Sessions.COLUMN_NAME_NODE_ID + "=?",
+						new String[]{session.nodeId}, null, null, null);
 				if (cursorExisting.moveToFirst())
 					rowId = cursorExisting.getLong(0);
 				cursorExisting.close();
 
 				if (rowId != null)
-					db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[] { String.valueOf(rowId) });
+					db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[]{String.valueOf(rowId)});
 				else
 					db.insert(Sessions.TABLE_NAME, null, values);
 
@@ -257,53 +264,51 @@ public final class SessionsManager
 	// TODO: where would be a better place to do this kind of initialization?
 	private void insertInitialData(SQLiteDatabase db)
 	{
-		Log.i(TAG, "Inserting initial sessions list");
+		Log.i(TAG, "Inserting initial bofs/sessions list");
 
-		insertInitialData(db, "sessions.json");
+		insertInitialData(db, "bofs.json", "sessions.json");
 	}
 
-	private void insertInitialData(SQLiteDatabase db, String assetName)
+	private String loadAsset(String assetName)
 	{
-		// temp code to load temp sessions file
 		InputStream stream = null;
-		ByteArrayOutputStream stringOutput = null;
-		String json = null;
 		try
 		{
 			stream = s_applicationContext.getAssets().open(assetName);
-			stringOutput = new ByteArrayOutputStream();
-			byte[] bytes = new byte[8192];
-			while (stream.read(bytes) != -1)
-				stringOutput.write(bytes);
-			json = stringOutput.toString("utf-8");
+			return StreamUtility.readAsString(stream);
 		}
 		catch (IOException e)
 		{
-			Log.w(TAG, "Couldn't load embedded json", e);
+			Log.w(TAG, "Couldn't read asset", e);
+			return null;
 		}
 		finally
 		{
-			try
+			IOUtils.closeQuietly(stream);
+		}
+	}
+
+	private void insertInitialData(SQLiteDatabase db, String bofsAssetName, String sessionsAssetName)
+	{
+		String bofSessionsJson = loadAsset(bofsAssetName);
+		if (bofSessionsJson != null)
+		{
+			List<SessionData> bofSessionsData = SessionData.parseFromJson(bofSessionsJson);
+			if (bofSessionsData != null)
 			{
-				if (stringOutput != null)
-					stringOutput.close();
-			}
-			catch (IOException e)
-			{
-			}
-			try
-			{
-				if (stream != null)
-					stream.close();
-			}
-			catch (IOException e)
-			{
+				for (SessionData bofSession : bofSessionsData)
+					bofSession.isBof = true;
+				insertOrUpdate(db, bofSessionsData);
 			}
 		}
 
-		List<SessionData> sessionData = json == null ? new ArrayList<SessionData>() : SessionData.parseFromJson(json);
-		if (sessionData != null)
-			insertOrUpdate(db, sessionData);
+		String sessionsJson = loadAsset(sessionsAssetName);
+		if (sessionsJson != null)
+		{
+			List<SessionData> sessionsData = SessionData.parseFromJson(sessionsJson);
+			if (sessionsData != null)
+				insertOrUpdate(db, sessionsData);
+		}
 	}
 
 	private SessionsManager(Context context)
@@ -316,7 +321,8 @@ public final class SessionsManager
 		// v1: initial version
 		// v2: update with embedded 2014 data
 		// v3: update with embedded 2015 data
-		public static final int DATABASE_VERSION = 3;
+		// v4: update with embedded 2016 data, add isBof
+		public static final int DATABASE_VERSION = 4;
 		public static final String DATABASE_NAME = "Sessions.db";
 
 		public SessionsDatabase(Context context)
@@ -337,7 +343,8 @@ public final class SessionsManager
 					+ Sessions.COLUMN_NAME_SPEAKERS + " TEXT,"
 					+ Sessions.COLUMN_NAME_EXPERIENCE_LEVEL + " TEXT,"
 					+ Sessions.COLUMN_NAME_TRACK + " TEXT,"
-					+ Sessions.COLUMN_NAME_STARRED + " INTEGER"
+					+ Sessions.COLUMN_NAME_STARRED + " INTEGER,"
+					+ Sessions.COLUMN_NAME_IS_BOF + " INTEGER"
 					+ ");");
 
 			insertInitialData(db);
@@ -349,9 +356,15 @@ public final class SessionsManager
 			// v1: initial version
 			// v2: update with embedded 2014 data
 			// v3: update with embedded 2015 data
-			// v4: update with embedded 2016 data
-			if (oldVersion == 1 || oldVersion == 2 || oldVersion == 3)
-				insertInitialData(db);
+			// v4: update with embedded 2016 data, add isBof
+			if (oldVersion < 4)
+			{
+				db.execSQL("ALTER TABLE " + Sessions.TABLE_NAME + " "
+						+ "ADD COLUMN " + Sessions.COLUMN_NAME_IS_BOF + " INTEGER"
+						+ ";");
+			}
+
+			insertInitialData(db);
 		}
 	}
 

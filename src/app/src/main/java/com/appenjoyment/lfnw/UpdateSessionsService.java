@@ -122,17 +122,29 @@ public class UpdateSessionsService extends Service
 //			Pair<Boolean, String> test = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule/mine.json");
 //			Log.w(TAG, "Mine s=" + test.first + ", v=" + test.second);
 
-			// load the json stream into a string
-			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule.json");
-			if(!jsonResult.first)
+			Pair<Boolean, String> bofJsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/bofs.json");
+			if (!bofJsonResult.first)
 				return false;
 
-			// parse the json
+			List<SessionData> bofSessionData = SessionData.parseFromJson(bofJsonResult.second);
+			if (bofSessionData == null)
+				return false;
+
+			if (bofSessionData.size() != 0)
+			{
+				for (SessionData bofSession : bofSessionData)
+					bofSession.isBof = true;
+				SessionsManager.getInstance(UpdateSessionsService.this).insertOrUpdate(bofSessionData);
+			}
+
+			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule.json");
+			if (!jsonResult.first)
+				return false;
+
 			List<SessionData> sessionData = SessionData.parseFromJson(jsonResult.second);
 			if (sessionData == null)
 				return false;
 
-			// insert/update the records
 			if (sessionData.size() != 0)
 				SessionsManager.getInstance(UpdateSessionsService.this).insertOrUpdate(sessionData);
 
@@ -150,7 +162,8 @@ public class UpdateSessionsService extends Service
 				SharedPreferences prefs = getSharedPreferences("UpdateSessionsService", MODE_PRIVATE);
 				prefs.edit().putLong(PREF_LAST_SUCCESSFUL_UPDATE, new Date().getTime()).commit();
 				Log.i(TAG, "Finished sessions list update success=true");
-			} else
+			}
+			else
 			{
 				Log.i(TAG, "Finished sessions list update success=false");
 			}
