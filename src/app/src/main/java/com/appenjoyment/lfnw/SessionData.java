@@ -259,6 +259,13 @@ public class SessionData
 			if (trackObject instanceof String)
 				session.track = (String) trackObject;
 		}
+		else if(sessionObject.has("Track"))
+		{
+			// alternate for 2016
+			Object trackObject = sessionObject.get("Track");
+			if (trackObject instanceof String)
+				session.track = (String) trackObject;
+		}
 
 		Object speakersObject = sessionObject.get("field_speakers");
 		if (speakersObject instanceof String)
