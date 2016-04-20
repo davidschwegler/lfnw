@@ -220,7 +220,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 
 		m_ticketsPagerAdapter.setTickets(tickets);
 
-		if(false)//(tickets.size() != 0)
+		if(tickets.size() != 0)
 		{
 			m_ticketsViewPager.setVisibility(View.VISIBLE);
 			m_messageLink.setVisibility(View.GONE);
