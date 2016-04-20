@@ -104,6 +104,8 @@ public final class AccountManager
 		// Sessions With Cookies on http://developer.android.com/reference/java/net/HttpURLConnection.html
 		cookie.setVersion(0);
 		((CookieManager) CookieHandler.getDefault()).getCookieStore().add(null, cookie);
+
+		android.webkit.CookieManager.getInstance().setCookie(domain, account.sessionName + "=" + account.sessionId);
 	}
 
 	private static final String TAG = "AccountManager";

@@ -3,10 +3,10 @@
 
     <color name="site_background_header_translucent">#DD76A5BA</color>
     <color name="site_background_dark">#103A57</color>
-    <color name="swipe_refresh_progress_1">#1E1916</color>
-    <color name="swipe_refresh_progress_2">#EAAE1F</color>
-    <color name="swipe_refresh_progress_3">#6B9DB3</color>
-    <color name="swipe_refresh_progress_4">#804932</color>
+    <color name="swipe_refresh_progress_1">#FFFCA300</color>
+    <color name="swipe_refresh_progress_2">#103A57</color>
+    <color name="swipe_refresh_progress_3">#FFFCA300</color>
+    <color name="swipe_refresh_progress_4">#103A57</color>
     <color name="accent">#FFFCA300</color>
 
 </resources>

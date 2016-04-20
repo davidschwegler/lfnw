@@ -7,16 +7,20 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.appenjoyment.lfnw.R;
 import com.appenjoyment.lfnw.accounts.AccountManager;
 import com.appenjoyment.lfnw.accounts.SignInResponseData;
 import com.appenjoyment.utility.HttpUtility;
+
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 
@@ -35,6 +39,21 @@ public class SignInActivity extends AppCompatActivity
 		m_signInButton = (Button) findViewById(R.id.btn_signin);
 		m_forgotPasswordLink = (TextView) findViewById(R.id.link_forgot_password);
 		m_signUpLink = (TextView) findViewById(R.id.link_signup);
+
+		m_passwordText.setOnEditorActionListener(new TextView.OnEditorActionListener()
+		{
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+			{
+				if (actionId == EditorInfo.IME_ACTION_DONE)
+				{
+					signIn();
+					return true;
+				}
+
+				return false;
+			}
+		});
 
 		m_signInButton.setOnClickListener(new View.OnClickListener()
 		{

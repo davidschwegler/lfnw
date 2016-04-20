@@ -33,6 +33,7 @@ import com.appenjoyment.lfnw.accounts.User;
 import com.appenjoyment.lfnw.main.MainFeature;
 import com.appenjoyment.lfnw.main.MainFeatureInfo;
 import com.appenjoyment.lfnw.signin.SignInActivity;
+import com.appenjoyment.lfnw.tickets.TicketsFragment;
 import com.appenjoyment.utility.DisplayMetricsUtility;
 import com.appenjoyment.utility.HttpUtility;
 import com.appenjoyment.utility.StreamUtility;
@@ -48,9 +49,10 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		List<MainFeatureInfo> features = new ArrayList<MainFeatureInfo>();
 		features.add(new MainFeatureInfo(MainFeature.Sessions, R.string.sessions_title, R.drawable.ic_sessions_calendar_blank));
 		features.add(new MainFeatureInfo(MainFeature.Scan, R.string.scan_badge_title, R.drawable.ic_scan_contact));
+		features.add(new MainFeatureInfo(MainFeature.Tickets, R.string.tickets_title, R.drawable.ic_register_nametag));
 		features.add(new MainFeatureInfo(MainFeature.Venue, R.string.venue_title, R.drawable.ic_venue_place));
 		features.add(new MainFeatureInfo(MainFeature.Sponsors, R.string.sponsors_title, R.drawable.ic_sponsors_heart));
-		features.add(new MainFeatureInfo(MainFeature.Register, R.string.register_title, R.drawable.ic_register_nametag));
+//		features.add(new MainFeatureInfo(MainFeature.Register, R.string.register_title, R.drawable.ic_register_nametag));
 		features.add(new MainFeatureInfo(MainFeature.About, R.string.about_title, R.drawable.ic_about_info));
 		mFeatures = features.toArray(new MainFeatureInfo[0]);
 	}
@@ -343,6 +345,27 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	}
 
 	@Override
+	protected void onResume()
+	{
+		super.onResume();
+
+		if (m_isSignedInAtLastPause != null && AccountManager.getInstance().isSignedIn() != m_isSignedInAtLastPause.booleanValue())
+		{
+			// restart activity
+			finish();
+			startActivity(new Intent(MainActivity.this, MainActivity.class));
+		}
+	}
+
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+
+		m_isSignedInAtLastPause = AccountManager.getInstance().isSignedIn();
+	}
+
+	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
@@ -369,19 +392,6 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 		return mDrawerLayout.isDrawerOpen(GravityCompat.START);
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		super.onActivityResult(requestCode, resultCode, data);
-
-		if (requestCode == SIGN_IN_REQUEST && resultCode == RESULT_OK)
-		{
-			// restart activity
-			finish();
-			startActivity(new Intent(MainActivity.this, MainActivity.class));
-		}
-	}
-
 	private boolean isSignedIn()
 	{
 		return AccountManager.getInstance().isSignedIn();
@@ -395,7 +405,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			if (position == 0)
 			{
 				if (!isSignedIn())
-					startActivityForResult(new Intent(MainActivity.this, SignInActivity.class), SIGN_IN_REQUEST);
+					startActivity(new Intent(MainActivity.this, SignInActivity.class));
 			}
 			else
 			{
@@ -434,6 +444,9 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 			case Sponsors:
 				fragment = WebViewFragment.newInstance("https://www.linuxfestnorthwest.org/2016/sponsors", getResources().getString(featureInfo.TitleId));
 				break;
+			case Tickets:
+				fragment = TicketsFragment.newInstance();
+				break;
 			case Venue:
 				fragment = WebViewFragment.newInstance("https://www.linuxfestnorthwest.org/2016/hotels", getResources().getString(featureInfo.TitleId));
 				break;
@@ -455,7 +468,6 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	private static final String PREFERENCE_USER_CLOSED_DRAWER = "UserClosedDrawer2016";
 	private static final String PREFERENCES_NAME = "MainActivity";
 	private static final int DEFAULT_FEATURE_INDEX = 0;
-	private static final int SIGN_IN_REQUEST = 1;
 
 	private final MainFeatureInfo[] mFeatures;
 
@@ -464,4 +476,5 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 	private ActionBarDrawerToggle mDrawerToggle;
 	private CharSequence mDrawerTitle;
 	private boolean m_closed;
+	private Boolean m_isSignedInAtLastPause;
 }

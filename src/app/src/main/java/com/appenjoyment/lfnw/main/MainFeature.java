@@ -7,5 +7,6 @@ public enum MainFeature
 	Scan,
 	Sessions,
 	Sponsors,
+	Tickets,
 	Venue
 }
