@@ -106,10 +106,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		super.onResume();
 
 		if (AccountManager.getInstance().isSignedIn() && m_updateTicketsTask == null && m_ticketsPagerAdapter.getCount() == 0)
-		{
-			m_swipeRefreshLayout.setEnabled(true);
 			refresh();
-		}
 	}
 
 	@Override
