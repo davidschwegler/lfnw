@@ -470,9 +470,14 @@ public final class SessionsManager
 			// v4: update with embedded 2016 data, add isBof
 			if (oldVersion < 4)
 			{
+				// can only add one column per alter table call
 				db.execSQL("ALTER TABLE " + Sessions.TABLE_NAME + " "
-						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL + " TEXT,"
-						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + " INTEGER DEFAULT -1,"
+						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL + " TEXT"
+						+ ";");
+				db.execSQL("ALTER TABLE " + Sessions.TABLE_NAME + " "
+						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + " INTEGER DEFAULT -1"
+						+ ";");
+				db.execSQL("ALTER TABLE " + Sessions.TABLE_NAME + " "
 						+ "ADD COLUMN " + Sessions.COLUMN_NAME_IS_BOF + " INTEGER"
 						+ ";");
 			}
