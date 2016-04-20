@@ -236,6 +236,7 @@ public class UpdateSessionsService extends Service
 				if (isFlaggedOnServer == null)
 				{
 					invalidUrls++;
+					flaggableSessions.remove(flaggableSession);
 					continue;
 				}
 
