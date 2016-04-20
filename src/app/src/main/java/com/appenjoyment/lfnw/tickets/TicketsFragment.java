@@ -81,6 +81,8 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		}
 		else
 		{
+			m_swipeRefreshLayout.setEnabled(false);
+
 			m_messageLink.setText("Sign in to view or\nget your free event tickets!");
 			m_messageLink.setOnClickListener(new View.OnClickListener()
 			{
@@ -104,7 +106,10 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		super.onResume();
 
 		if (AccountManager.getInstance().isSignedIn() && m_updateTicketsTask == null && m_ticketsPagerAdapter.getCount() == 0)
+		{
+			m_swipeRefreshLayout.setEnabled(true);
 			refresh();
+		}
 	}
 
 	@Override
