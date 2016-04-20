@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity implements IDrawerActivity
 					UserViewHolder holder = convertView != null ? (UserViewHolder) convertView.getTag() : null;
 					if (holder != null)
 					{
-						holder.avatarDownloadTask.cancel(true);
+						holder.avatarDownloadTask.cancel(false);
 					}
 					else
 					{

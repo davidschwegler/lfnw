@@ -8,17 +8,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.appenjoyment.utility.HttpUtility;
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersAdapter;
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersListView;
 
@@ -109,7 +114,13 @@ public class SessionsListFragment extends Fragment
 				@Override
 				public void onClick(View view)
 				{
-					SessionsManager.getInstance(getActivity()).starSession(viewHolder.rowId, viewHolder.star.isChecked());
+					if (SessionsManager.getInstance(getActivity()).starSession(viewHolder.rowId, viewHolder.star.isChecked()))
+					{
+						// sync sessions to update after star
+						getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
+								.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_SYNC));
+					}
+
 					cursor.requery();
 				}
 			});

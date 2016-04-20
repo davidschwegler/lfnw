@@ -57,7 +57,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			{
 				if (m_updateTicketsTask != null)
 				{
-					m_updateTicketsTask.cancel(true);
+					m_updateTicketsTask.cancel(false);
 					m_updateTicketsTask = null;
 				}
 
@@ -116,7 +116,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 
 		if (m_updateTicketsTask != null)
 		{
-			m_updateTicketsTask.cancel(true);
+			m_updateTicketsTask.cancel(false);
 			m_updateTicketsTask = null;
 		}
 

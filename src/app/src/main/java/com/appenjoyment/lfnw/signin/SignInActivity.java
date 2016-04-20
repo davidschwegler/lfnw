@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appenjoyment.lfnw.R;
+import com.appenjoyment.lfnw.UpdateSessionsService;
 import com.appenjoyment.lfnw.accounts.AccountManager;
 import com.appenjoyment.lfnw.accounts.SignInResponseData;
 import com.appenjoyment.utility.HttpUtility;
@@ -129,6 +130,11 @@ public class SignInActivity extends AppCompatActivity
 						return false;
 
 					AccountManager.getInstance().setLogin(data.account, data.user);
+
+					// force sessions to update after login
+					startService(new Intent(SignInActivity.this, UpdateSessionsService.class)
+							.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_FORCED)
+							.putExtra(UpdateSessionsService.EXTRA_START_INTERRUPT, true));
 
 					return true;
 				}

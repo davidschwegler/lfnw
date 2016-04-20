@@ -147,7 +147,7 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 
 		if (m_loadQrCodeTask != null)
 		{
-			m_loadQrCodeTask.cancel(true);
+			m_loadQrCodeTask.cancel(false);
 			m_loadQrCodeTask = null;
 		}
 

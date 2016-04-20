@@ -98,6 +98,7 @@ public class SessionData
 	public String speakers;
 	public String experienceLevel;
 	public String track;
+	public String flagMyScheduleUrl;
 	public boolean isBof;
 
 	// e.g.
@@ -259,7 +260,7 @@ public class SessionData
 			if (trackObject instanceof String)
 				session.track = (String) trackObject;
 		}
-		else if(sessionObject.has("Track"))
+		else if (sessionObject.has("Track"))
 		{
 			// alternate for 2016
 			Object trackObject = sessionObject.get("Track");
@@ -270,6 +271,10 @@ public class SessionData
 		Object speakersObject = sessionObject.get("field_speakers");
 		if (speakersObject instanceof String)
 			session.speakers = (String) speakersObject;
+
+		Object myScheduleObject = sessionObject.get("My Schedule");
+		if (myScheduleObject instanceof String && !((String) myScheduleObject).isEmpty())
+			session.flagMyScheduleUrl = (String) myScheduleObject;
 
 		return session;
 	}

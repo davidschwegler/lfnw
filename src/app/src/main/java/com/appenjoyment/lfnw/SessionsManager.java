@@ -1,11 +1,11 @@
 package com.appenjoyment.lfnw;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -49,6 +49,8 @@ public final class SessionsManager
 		public static final String COLUMN_NAME_TRACK = "Track";
 		public static final String COLUMN_NAME_STARRED = "Starred";
 		public static final String COLUMN_NAME_IS_BOF = "IsBof";
+		public static final String COLUMN_NAME_FLAG_MY_SCHEDULE_URL = "FlagMySchedule";
+		public static final String COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME = "FlagMyScheduleDirtyTime";
 
 		private Sessions()
 		{
@@ -60,7 +62,8 @@ public final class SessionsManager
 	 */
 	public static final String[] ALL_SESSIONS_ROWS = new String[]{Sessions._ID, Sessions.COLUMN_NAME_NODE_ID, Sessions.COLUMN_NAME_TITLE,
 			Sessions.COLUMN_NAME_ROOM, Sessions.COLUMN_NAME_START_TIME, Sessions.COLUMN_NAME_END_TIME, Sessions.COLUMN_NAME_SPEAKERS,
-			Sessions.COLUMN_NAME_EXPERIENCE_LEVEL, Sessions.COLUMN_NAME_TRACK, Sessions.COLUMN_NAME_STARRED, Sessions.COLUMN_NAME_IS_BOF};
+			Sessions.COLUMN_NAME_EXPERIENCE_LEVEL, Sessions.COLUMN_NAME_TRACK, Sessions.COLUMN_NAME_STARRED, Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL,
+			Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, Sessions.COLUMN_NAME_IS_BOF};
 
 	/**
 	 * Returns the static instance of this manager.
@@ -156,6 +159,16 @@ public final class SessionsManager
 	}
 
 	/**
+	 * Returns all sessions with a flag my schedule url
+	 */
+	@SuppressWarnings("deprecation")
+	public Cursor getAllSessionsWithFlagMyScheduleUrl()
+	{
+		return query(false, Sessions.TABLE_NAME, new String[]{Sessions.COLUMN_NAME_NODE_ID, Sessions.COLUMN_NAME_STARRED, Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL},
+				Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL + " IS NOT NULL", null, null, null, null, null);
+	}
+
+	/**
 	 * Sets whether a session is starred.
 	 *
 	 * @return True if the session existed and the state was set.
@@ -169,6 +182,7 @@ public final class SessionsManager
 		{
 			ContentValues values = new ContentValues();
 			values.put(Sessions.COLUMN_NAME_STARRED, starred);
+			values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, new GregorianCalendar().getTimeInMillis());
 
 			int rows = db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[]{String.valueOf(rowId)});
 
@@ -194,6 +208,71 @@ public final class SessionsManager
 	{
 		SQLiteDatabase db = m_dbHelper.getReadableDatabase();
 		return db.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+	}
+
+	public void clearDirtyFlag(String nodeId, long dirtyTime)
+	{
+		SQLiteDatabase db = m_dbHelper.getWritableDatabase();
+		db.beginTransaction();
+		try
+		{
+			// enforce our dirty times match
+			ContentValues values = new ContentValues();
+			values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, 0);
+
+			db.update(Sessions.TABLE_NAME, values, Sessions.COLUMN_NAME_NODE_ID + "=? AND " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + "=?",
+					new String[]{nodeId, String.valueOf(dirtyTime)});
+
+			db.setTransactionSuccessful();
+		}
+		finally
+		{
+			db.endTransaction();
+		}
+	}
+
+	public void clearDirtyFlagWithUrl(String nodeId, long dirtyTime, String url)
+	{
+		SQLiteDatabase db = m_dbHelper.getWritableDatabase();
+		db.beginTransaction();
+		try
+		{
+			// enforce our dirty times match
+			ContentValues values = new ContentValues();
+			values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL, url);
+			values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, 0);
+
+			db.update(Sessions.TABLE_NAME, values, Sessions.COLUMN_NAME_NODE_ID + "=? AND " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + "=?",
+					new String[]{nodeId, String.valueOf(dirtyTime)});
+
+			db.setTransactionSuccessful();
+		}
+		finally
+		{
+			db.endTransaction();
+		}
+	}
+
+	public void clearDirtyFlagWithStarred(String nodeId, long dirtyTime, boolean starred)
+	{
+		SQLiteDatabase db = m_dbHelper.getWritableDatabase();
+		db.beginTransaction();
+		try
+		{
+			// enforce our dirty times match
+			ContentValues values = new ContentValues();
+			values.put(Sessions.COLUMN_NAME_STARRED, starred);
+			values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, 0);
+
+			db.update(Sessions.TABLE_NAME, values, Sessions.COLUMN_NAME_NODE_ID + "=? AND " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + "=?",
+					new String[]{nodeId, String.valueOf(dirtyTime)});
+
+			db.setTransactionSuccessful();
+		}
+		finally
+		{
+			db.endTransaction();
+		}
 	}
 
 	/**
@@ -229,6 +308,7 @@ public final class SessionsManager
 				values.put(Sessions.COLUMN_NAME_TRACK, session.track);
 				values.put(Sessions.COLUMN_NAME_START_TIME, dateRange.first.getTime());
 				values.put(Sessions.COLUMN_NAME_END_TIME, dateRange.second.getTime());
+				values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL, session.flagMyScheduleUrl);
 				values.put(Sessions.COLUMN_NAME_IS_BOF, session.isBof);
 
 				// TODO: do this better
@@ -236,16 +316,45 @@ public final class SessionsManager
 
 				// look for a row that already exists
 				Long rowId = null;
-				Cursor cursorExisting = db.query(Sessions.TABLE_NAME, new String[]{Sessions._ID}, Sessions.COLUMN_NAME_NODE_ID + "=?",
+				Boolean starred = null;
+				Long dirtyTime = null;
+				Cursor cursorExisting = db.query(Sessions.TABLE_NAME, new String[]{Sessions._ID, Sessions.COLUMN_NAME_STARRED, Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME}, Sessions.COLUMN_NAME_NODE_ID + "=?",
 						new String[]{session.nodeId}, null, null, null);
 				if (cursorExisting.moveToFirst())
+				{
 					rowId = cursorExisting.getLong(0);
+					starred = cursorExisting.getInt(1) == 1;
+					dirtyTime = cursorExisting.getLong(2);
+				}
 				cursorExisting.close();
 
 				if (rowId != null)
+				{
+					// if not dirty, just update starred to match server, otherwise let sync figure it out
+					// TODO: should this code actually be in sync?
+					if (dirtyTime.longValue() == 0)
+					{
+						Boolean isFlaggedOnServer = FlagMyScheduleUtility.isFlaggedOnServer(session.flagMyScheduleUrl);
+						if (isFlaggedOnServer != null && isFlaggedOnServer.booleanValue() != starred)
+						{
+							Log.d(TAG, "Updated " + session.nodeId + " with server starred=" + isFlaggedOnServer.booleanValue());
+							values.put(Sessions.COLUMN_NAME_STARRED, isFlaggedOnServer);
+						}
+					}
+
 					db.update(Sessions.TABLE_NAME, values, Sessions._ID + "=?", new String[]{String.valueOf(rowId)});
+				}
 				else
+				{
+					// always up to date when first sync'd down
+					values.put(Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME, 0);
+
+					Boolean isFlaggedOnServer = FlagMyScheduleUtility.isFlaggedOnServer(session.flagMyScheduleUrl);
+					if (isFlaggedOnServer != null)
+						values.put(Sessions.COLUMN_NAME_STARRED, isFlaggedOnServer.booleanValue());
+
 					db.insert(Sessions.TABLE_NAME, null, values);
+				}
 
 				processedAny = true;
 			}
@@ -344,6 +453,8 @@ public final class SessionsManager
 					+ Sessions.COLUMN_NAME_EXPERIENCE_LEVEL + " TEXT,"
 					+ Sessions.COLUMN_NAME_TRACK + " TEXT,"
 					+ Sessions.COLUMN_NAME_STARRED + " INTEGER,"
+					+ Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL + " INTEGER,"
+					+ Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + " INTEGER DEFAULT -1,"
 					+ Sessions.COLUMN_NAME_IS_BOF + " INTEGER"
 					+ ");");
 
@@ -360,6 +471,8 @@ public final class SessionsManager
 			if (oldVersion < 4)
 			{
 				db.execSQL("ALTER TABLE " + Sessions.TABLE_NAME + " "
+						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_URL + " TEXT,"
+						+ "ADD COLUMN " + Sessions.COLUMN_NAME_FLAG_MY_SCHEDULE_DIRTY_TIME + " INTEGER DEFAULT -1,"
 						+ "ADD COLUMN " + Sessions.COLUMN_NAME_IS_BOF + " INTEGER"
 						+ ";");
 			}
