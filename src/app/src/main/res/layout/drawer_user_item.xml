@@ -68,7 +68,6 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:paddingLeft="16dp"
-                android:text="David Schwegler"
                 android:textColor="#fff"
                 android:textSize="16sp"/>
 
@@ -79,7 +78,6 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:paddingLeft="16dp"
-                android:text="DavidSchwegler"
                 android:textColor="#fff"
                 android:textSize="12sp"/>
         </LinearLayout>
