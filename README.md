@@ -6,7 +6,7 @@ The Official LinuxFest Android App
 Get the published version in the Play Store!
 https://play.google.com/store/apps/details?id=com.appenjoyment.lfnw
 
-### Code stuff to do
+### Feature wishlist
 * User Features
   * In-app new user registration, forgot password
   * Surveys
