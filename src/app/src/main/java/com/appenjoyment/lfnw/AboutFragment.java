@@ -44,7 +44,7 @@ public class AboutFragment extends Fragment implements IDrawerFragment
 		TextView version = (TextView) view.findViewById(R.id.about_version);
 		version.setText(getString(R.string.about_version) + ": " + packageInfo.versionName);
 
-		SpannableStringBuilder builder = new SpannableStringBuilder(getString(R.string.about_support_email) + ": ");
+		SpannableStringBuilder builder = new SpannableStringBuilder();
 		final String supportEmail = getString(R.string.support_email);
 		builder.append(supportEmail);
 		builder.setSpan(new URLSpan(supportEmail), builder.length() - supportEmail.length(), builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -75,6 +75,21 @@ public class AboutFragment extends Fragment implements IDrawerFragment
 				{
 					Toast.makeText(getActivity(), "Couldn't send email", Toast.LENGTH_SHORT).show();
 				}
+			}
+		});
+
+		final String githubUrl = getString(R.string.about_contribute_github);
+		SpannableStringBuilder githubUrlBuilder = new SpannableStringBuilder(githubUrl);
+		githubUrlBuilder.setSpan(new URLSpan(githubUrl), 0, githubUrl.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		TextView github = (TextView) view.findViewById(R.id.about_contribute_github);
+		github.setText(githubUrlBuilder);
+		github.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://" + githubUrl)));
 			}
 		});
 
