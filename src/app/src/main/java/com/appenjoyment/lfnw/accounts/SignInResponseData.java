@@ -64,26 +64,8 @@ public class SignInResponseData
 			response.user.userName = userObject.getString("name");
 			response.user.email = userObject.getString("mail");
 
-			JSONObject pictureObject = userObject.getJSONObject("picture");
-			response.user.avatarUrl = pictureObject.getString("url");
-			if (response.user.avatarUrl != null)
-				response.user.avatarUrl = response.user.avatarUrl.replace("\\/", "/");
-
-			JSONObject firstNameObject = userObject.getJSONObject("field_profile_first");
-			JSONArray firstNameArray = firstNameObject.getJSONArray("und");
-			if (firstNameArray.length() > 0)
-			{
-				JSONObject firstNameArrayObject = firstNameArray.getJSONObject(0);
-				response.user.firstName = firstNameArrayObject.getString("value");
-			}
-
-			JSONObject lastNameObject = userObject.getJSONObject("field_profile_last");
-			JSONArray lastNameArray = lastNameObject.getJSONArray("und");
-			if (lastNameArray.length() > 0)
-			{
-				JSONObject lastNameArrayObject = lastNameArray.getJSONObject(0);
-				response.user.lastName = lastNameArrayObject.getString("value");
-			}
+			// allow this stuff to fail and us to still accept the login
+			parseNonCriticalDataFromJson(userObject, response);
 
 			return response;
 		}
@@ -104,6 +86,69 @@ public class SignInResponseData
 			// all-or-nothing for now
 			Log.e(TAG, "Error parsing sign in response Json", e);
 			return null;
+		}
+	}
+
+	private static void parseNonCriticalDataFromJson(JSONObject userObject, SignInResponseData response)
+	{
+		// since this is such a critical path, be as lenient as possible, but if all else fails, we can ignore this stuff
+		try
+		{
+			if (userObject.has("picture") && !userObject.isNull("picture"))
+			{
+				JSONObject pictureObject = userObject.getJSONObject("picture");
+				if (pictureObject.has("url") && !pictureObject.isNull("url"))
+				{
+					response.user.avatarUrl = pictureObject.getString("url");
+					if (response.user.avatarUrl != null)
+						response.user.avatarUrl = response.user.avatarUrl.replace("\\/", "/");
+				}
+			}
+
+			if (userObject.has("field_profile_first") && !userObject.isNull("field_profile_first"))
+			{
+				JSONObject firstNameObject = userObject.getJSONObject("field_profile_first");
+				if (firstNameObject.has("und") && !firstNameObject.isNull("und"))
+				{
+					JSONArray firstNameArray = firstNameObject.getJSONArray("und");
+					if (firstNameArray.length() > 0)
+					{
+						JSONObject firstNameArrayObject = firstNameArray.getJSONObject(0);
+						if (firstNameArrayObject.has("value") && !firstNameArrayObject.isNull("value"))
+							response.user.firstName = firstNameArrayObject.getString("value");
+					}
+				}
+			}
+
+			if (userObject.has("field_profile_last") && !userObject.isNull("field_profile_last"))
+			{
+				JSONObject lastNameObject = userObject.getJSONObject("field_profile_last");
+				if (lastNameObject.has("und") && !lastNameObject.isNull("und"))
+				{
+					JSONArray lastNameArray = lastNameObject.getJSONArray("und");
+					if (lastNameArray.length() > 0)
+					{
+						JSONObject lastNameArrayObject = lastNameArray.getJSONObject(0);
+						if (lastNameArrayObject.has("value") && !lastNameArrayObject.isNull("value"))
+							response.user.lastName = lastNameArrayObject.getString("value");
+					}
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			// all-or-nothing for now
+			Log.e(TAG, "Error parsing non-critical sign-in response Json", e);
+		}
+		catch (ClassCastException e)
+		{
+			// all-or-nothing for now
+			Log.e(TAG, "Error parsing non-critical sign-in response Json", e);
+		}
+		catch (NumberFormatException e)
+		{
+			// all-or-nothing for now
+			Log.e(TAG, "Error parsing non-critical sign-in response Json", e);
 		}
 	}
 
