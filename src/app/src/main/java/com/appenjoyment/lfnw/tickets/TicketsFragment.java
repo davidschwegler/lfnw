@@ -240,7 +240,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 
 		m_ticketsPagerAdapter.setTickets(tickets);
 
-		if(tickets.size() != 0)
+		if (tickets.size() != 0)
 		{
 			m_ticketsViewPager.setVisibility(View.VISIBLE);
 			m_messageLink.setVisibility(View.GONE);
@@ -277,6 +277,12 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		public int getCount()
 		{
 			return m_tickets.size();
+		}
+
+		@Override
+		public int getItemPosition(Object object)
+		{
+			return POSITION_NONE;
 		}
 
 		@Override
