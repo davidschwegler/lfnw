@@ -2,17 +2,17 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
-			android:fitsSystemWindows="true"
-			android:paddingLeft="@dimen/activity_horizontal_margin"
-			android:paddingRight="@dimen/activity_horizontal_margin"
-			android:paddingTop="@dimen/activity_horizontal_margin"
-			android:paddingBottom="@dimen/activity_horizontal_margin">
+			android:fitsSystemWindows="true">
 
 	<LinearLayout
 		android:orientation="vertical"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:padding="24dp">
+		android:padding="24dp"
+		android:layout_marginLeft="@dimen/activity_horizontal_margin"
+		android:layout_marginRight="@dimen/activity_horizontal_margin"
+		android:layout_marginTop="@dimen/activity_horizontal_margin"
+		android:layout_marginBottom="@dimen/activity_horizontal_margin">
 
 		<ImageView android:src="@drawable/ic_launcher"
 				   android:layout_width="wrap_content"
