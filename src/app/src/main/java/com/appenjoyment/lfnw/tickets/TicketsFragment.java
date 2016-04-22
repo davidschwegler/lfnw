@@ -70,6 +70,24 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		m_ticketsViewPager = (ViewPager) view.findViewById(R.id.tickets_view_pager);
 		m_ticketsPagerAdapter = new TicketsPagerAdapter(getChildFragmentManager());
 		m_ticketsViewPager.setAdapter(m_ticketsPagerAdapter);
+		m_ticketsViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+		{
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+			{
+			}
+
+			@Override
+			public void onPageSelected(int position)
+			{
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int state)
+			{
+				m_swipeRefreshLayout.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
+			}
+		});
 
 		if (AccountManager.getInstance().isSignedIn())
 		{
