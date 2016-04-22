@@ -14,6 +14,12 @@ import java.net.URL;
 
 public class HttpUtility
 {
+	public  static void setTimeouts(HttpURLConnection connection)
+	{
+		connection.setConnectTimeout(15000);
+		connection.setReadTimeout(15000);
+	}
+
 	public static URL createURL(String urlString)
 	{
 		try
@@ -38,6 +44,7 @@ public class HttpUtility
 		try
 		{
 			urlConnection = (HttpURLConnection) url.openConnection();
+			setTimeouts(urlConnection);
 			result = StreamUtility.readAsString(urlConnection.getInputStream());
 		}
 		catch (IOException e)
@@ -65,6 +72,7 @@ public class HttpUtility
 		try
 		{
 			urlConnection = (HttpURLConnection) url.openConnection();
+			setTimeouts(urlConnection);
 			result = StreamUtility.readAsBytes(urlConnection.getInputStream());
 		}
 		catch (IOException e)
@@ -100,8 +108,7 @@ public class HttpUtility
 		try
 		{
 			urlConnection = (HttpURLConnection) url.openConnection();
-			//			conn.setReadTimeout( 10000 /*milliseconds*/ );
-			//			conn.setConnectTimeout( 15000 /* milliseconds */ );
+			setTimeouts(urlConnection);
 
 			try
 			{

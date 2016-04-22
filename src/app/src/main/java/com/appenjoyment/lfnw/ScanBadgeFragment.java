@@ -501,6 +501,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 			try
 			{
 				urlConnection = (HttpURLConnection) url.openConnection();
+				HttpUtility.setTimeouts(urlConnection);
 				int responseCode = urlConnection.getResponseCode();
 				if (responseCode == HttpURLConnection.HTTP_OK)
 					return StreamUtility.readAsString(urlConnection.getInputStream());
