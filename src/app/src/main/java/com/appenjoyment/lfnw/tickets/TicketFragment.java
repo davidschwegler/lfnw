@@ -39,6 +39,7 @@ import java.util.List;
 
 public class TicketFragment extends Fragment implements IDrawerFragment
 {
+
 	public static TicketFragment newInstance(long ticketId, int ticketPosition, int ticketCount)
 	{
 		Bundle bundle = new Bundle();
@@ -58,6 +59,7 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 
 		m_ticketImage = (ImageView) view.findViewById(R.id.ticket_image);
 		m_ticketProgress = (ProgressBar) view.findViewById(R.id.ticket_image_progress);
+		m_message = (TextView) view.findViewById(R.id.ticket_message);
 
 		int ticketPosition = getArguments().getInt(KEY_TICKET_POSITION);
 		int ticketCount = getArguments().getInt(KEY_TICKET_COUNT);
@@ -71,10 +73,23 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 			((TextView) view.findViewById(R.id.ticket_type)).setText(ticket.ticketType);
 			m_codeUrl = ticket.codeUrl;
 
-			m_loadQrCodeTask = new LoadQrCodeTask().execute();
+			load();
+		}
+		else
+		{
+			// should never happen
 		}
 
 		return view;
+	}
+
+	private void load()
+	{
+		if (m_loadQrCodeTask != null)
+			return;
+
+		m_loadQrCodeTask = new LoadQrCodeTask().execute();
+		updateMessage(false);
 	}
 
 	private class LoadQrCodeTask extends AsyncTask<Void, Void, Bitmap>
@@ -130,12 +145,14 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 		{
 			if (!isCancelled() && !m_closed)
 			{
+				m_loadQrCodeTask = null;
+
 				m_ticketProgress.setVisibility(View.GONE);
 
 				if (bitmap != null)
 					m_ticketImage.setImageBitmap(bitmap);
 				else
-					Toast.makeText(getActivity(), "Couldn't download QR code - check your internet connection", Toast.LENGTH_SHORT).show();
+					updateMessage(true);
 			}
 		}
 	}
@@ -167,6 +184,26 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 		getActivity().supportInvalidateOptionsMenu();
 	}
 
+	private void updateMessage(boolean networkError)
+	{
+		if (networkError && m_loadQrCodeTask == null)
+		{
+			m_message.setVisibility(View.VISIBLE);
+			m_message.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					load();
+				}
+			});
+		}
+		else
+		{
+			m_message.setVisibility(View.GONE);
+		}
+	}
+
 	private static final String TAG = "TicketFragment";
 	private static final String KEY_TICKET_ID = "TicketId";
 	private static final String KEY_TICKET_POSITION = "TicketPosition";
@@ -175,5 +212,6 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 	private String m_codeUrl;
 	private ImageView m_ticketImage;
 	private ProgressBar m_ticketProgress;
+	private TextView m_message;
 	private AsyncTask<?, ?, ?> m_loadQrCodeTask;
 }

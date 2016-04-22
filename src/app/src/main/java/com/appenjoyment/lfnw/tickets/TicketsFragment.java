@@ -55,11 +55,6 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			@Override
 			public void onRefresh()
 			{
-				if (m_updateTicketsTask != null)
-				{
-					m_updateTicketsTask.cancel(false);
-					m_updateTicketsTask = null;
-				}
 
 				m_swipeRefreshLayout.setRefreshing(false);
 				refresh();
@@ -123,7 +118,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	{
 		super.onResume();
 
-		if (AccountManager.getInstance().isSignedIn() && m_updateTicketsTask == null && m_ticketsPagerAdapter.getCount() == 0)
+		if (AccountManager.getInstance().isSignedIn() && m_updateTicketsTask == null)
 			refresh();
 	}
 
@@ -175,14 +170,16 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 
 	private void refresh()
 	{
+		if (m_updateTicketsTask != null)
+		{
+			m_updateTicketsTask.cancel(false);
+			m_updateTicketsTask = null;
+		}
+
+		m_swipeRefreshLayout.setRefreshing(true);
+
 		m_updateTicketsTask = new AsyncTask<Void, Void, Boolean>()
 		{
-			@Override
-			protected void onPreExecute()
-			{
-				m_swipeRefreshLayout.setRefreshing(true);
-			}
-
 			@Override
 			protected Boolean doInBackground(Void... params)
 			{
@@ -226,26 +223,32 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 					m_updateTicketsTask = null;
 
 					if (result != null && result.booleanValue())
+					{
+						updateMessage(false);
 						reloadTickets();
+					}
 					else
-						Toast.makeText(getActivity(), "Couldn't refresh tickets - check your internet connection", Toast.LENGTH_SHORT).show();
+					{
+						updateMessage(true);
+
+						if (m_ticketsPagerAdapter.getCount() != 0)
+							Toast.makeText(getActivity(), "Couldn't refresh tickets - check your internet connection", Toast.LENGTH_SHORT).show();
+					}
 				}
 			}
 		}.execute();
+
+		updateMessage(false);
 	}
 
-	private void reloadTickets()
+	private void updateMessage(boolean networkError)
 	{
-		List<TicketData> tickets = TicketsManager.getInstance().getTicketsForYear(new GregorianCalendar().get(GregorianCalendar.YEAR));
-
-		m_ticketsPagerAdapter.setTickets(tickets);
-
-		if (tickets.size() != 0)
+		if (m_ticketsPagerAdapter.getCount() != 0 || m_updateTicketsTask != null)
 		{
 			m_ticketsViewPager.setVisibility(View.VISIBLE);
 			m_messageLink.setVisibility(View.GONE);
 		}
-		else
+		else if (!networkError)
 		{
 			m_ticketsViewPager.setVisibility(View.GONE);
 			m_messageLink.setVisibility(View.VISIBLE);
@@ -261,6 +264,28 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 				}
 			});
 		}
+		else
+		{
+			m_ticketsViewPager.setVisibility(View.GONE);
+			m_messageLink.setVisibility(View.VISIBLE);
+			m_messageLink.setText("Couldn't update tickets - check your internet connection.\nTap or swipe down to try again.");
+			m_messageLink.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					refresh();
+				}
+			});
+		}
+	}
+
+	private void reloadTickets()
+	{
+		List<TicketData> tickets = TicketsManager.getInstance().getTicketsForYear(new GregorianCalendar().get(GregorianCalendar.YEAR));
+		m_ticketsPagerAdapter.setTickets(tickets);
+
+		updateMessage(false);
 	}
 
 	// TODO: I'd rather do FragmentPagerAdapter, but the images stop showing up after paging thru once...

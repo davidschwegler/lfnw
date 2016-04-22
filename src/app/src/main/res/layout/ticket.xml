@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="Username"/>
 
     <TextView
@@ -19,7 +19,6 @@
         android:layout_marginBottom="16dp"
         android:layout_marginTop="8dp"
         android:text="Ticket Type"/>
-
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -34,11 +33,20 @@
             android:minHeight="240dp"
             android:minWidth="240dp"
             android:scaleType="fitCenter"/>
+
         <ProgressBar
             android:id="@+id/ticket_image_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/ticket_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Couldn't download QR code - check your internet connection.\nTap to try again."/>
     </FrameLayout>
 
     <TextView
