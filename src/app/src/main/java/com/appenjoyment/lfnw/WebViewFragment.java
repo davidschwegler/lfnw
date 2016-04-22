@@ -54,6 +54,9 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		if (getActivity() instanceof IDrawerActivity)
+			m_drawerOpen = ((IDrawerActivity) getActivity()).isDrawerOpen();
+
 		CookieSyncManager.createInstance(getActivity());
 
 		setHasOptionsMenu(true);
@@ -77,27 +80,29 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 				m_webView.reload();
 
 				// use our callbacks, don't assume we'll succesfully start reloading
-				m_swipeRefreshLayout.setRefreshing(m_isLoading);
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(m_isLoading);
 			}
 		});
 
 		CookieManager.getInstance().setAcceptCookie(true);
 		m_webView.getSettings().setJavaScriptEnabled(true);
 		setZoomSettings();
-		
+
 		m_webView.setWebViewClient(new WebViewClient()
 		{
 			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 			{
 				Log.w(TAG, "OnReceivedError: " + description + " url: " + failingUrl);
 			}
-			 
+
 			@Override
-			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				
-				if(HandleFileDownloadUri(url))
+			public boolean shouldOverrideUrlLoading(WebView view, String url)
+			{
+
+				if (HandleFileDownloadUri(url))
 					return true;
-				
+
 				return super.shouldOverrideUrlLoading(view, url);
 			}
 
@@ -106,9 +111,10 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 			{
 				super.onPageStarted(view, url, favicon);
 				Log.d(TAG, "OnPageStarted: " + url);
-				
+
 				m_isLoading = true;
-				m_swipeRefreshLayout.setRefreshing(true);
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(true);
 			}
 
 			@Override
@@ -116,31 +122,32 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 			{
 				super.onPageFinished(view, url);
 				m_isLoading = false;
-				m_swipeRefreshLayout.setRefreshing(false);
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(false);
 
 				CookieSyncManager.getInstance().sync();
 			}
 
 			@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-			private boolean HandleFileDownloadUri(String url) 
+			private boolean HandleFileDownloadUri(String url)
 			{
-				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && url.endsWith(".pdf"))
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && url.endsWith(".pdf"))
 				{
-					DownloadManager manager = (DownloadManager)getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
-					
+					DownloadManager manager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+
 					Uri uri = Uri.parse(url);
-					if(uri != null)
-					{					
+					if (uri != null)
+					{
 						Request request = new Request(uri);
 						int lastSlash = url.lastIndexOf('/');
 						request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, url.substring(lastSlash == -1 ? 0 : lastSlash));
 						request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 						manager.enqueue(request);
-						
+
 						return true;
 					}
 				}
-				
+
 				return false;
 			}
 		});
@@ -155,11 +162,11 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 		return m_swipeRefreshLayout;
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB) 
-	private void setZoomSettings() 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setZoomSettings()
 	{
 		m_webView.getSettings().setBuiltInZoomControls(true);
-		if(Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
 			m_webView.getSettings().setDisplayZoomControls(false);
 	}
 
@@ -191,21 +198,21 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 	{
 		switch (item.getItemId())
 		{
-		case R.id.menu_open_in_browser:
-			String currentUrl = m_webView.getUrl();
-			Uri uri = Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl);
-			try
-			{
-				startActivity(new Intent(Intent.ACTION_VIEW, uri));
-			}
-			catch (ActivityNotFoundException e)
-			{
-				Toast.makeText(getActivity(), "Couldn't open in browser.", Toast.LENGTH_SHORT).show();
-			}
-			return true;
-		case R.id.menu_refresh:
-			m_webView.reload();
-			return true;
+			case R.id.menu_open_in_browser:
+				String currentUrl = m_webView.getUrl();
+				Uri uri = Uri.parse(currentUrl != null && currentUrl.length() != 0 ? currentUrl : m_requestedUrl);
+				try
+				{
+					startActivity(new Intent(Intent.ACTION_VIEW, uri));
+				}
+				catch (ActivityNotFoundException e)
+				{
+					Toast.makeText(getActivity(), "Couldn't open in browser.", Toast.LENGTH_SHORT).show();
+				}
+				return true;
+			case R.id.menu_refresh:
+				m_webView.reload();
+				return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -229,6 +236,10 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 	public void onDrawerOpened()
 	{
 		getActivity().supportInvalidateOptionsMenu();
+
+		// hack -- if we swap features while refreshing, the view gets stuck
+		m_swipeRefreshLayout.setRefreshing(false);
+		m_drawerOpen = true;
 	}
 
 	@Override
@@ -236,6 +247,10 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 	{
 		getActivity().setTitle(m_title);
 		getActivity().supportInvalidateOptionsMenu();
+
+		m_drawerOpen = false;
+		if (m_isLoading)
+			m_swipeRefreshLayout.setRefreshing(true);
 	}
 
 	private static final String TAG = WebViewFragment.class.getName();
@@ -247,4 +262,5 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 	private String m_requestedUrl;
 	private String m_title;
 	private boolean m_isLoading;
+	private boolean m_drawerOpen;
 }

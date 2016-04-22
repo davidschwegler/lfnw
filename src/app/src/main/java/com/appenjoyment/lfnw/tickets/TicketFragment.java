@@ -2,44 +2,23 @@ package com.appenjoyment.lfnw.tickets;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.appenjoyment.lfnw.IDrawerActivity;
-import com.appenjoyment.lfnw.IDrawerFragment;
 import com.appenjoyment.lfnw.R;
-import com.appenjoyment.lfnw.accounts.AccountManager;
 import com.appenjoyment.utility.HttpUtility;
-import com.appenjoyment.utility.StreamUtility;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-public class TicketFragment extends Fragment implements IDrawerFragment
+public class TicketFragment extends Fragment
 {
-
 	public static TicketFragment newInstance(long ticketId, int ticketPosition, int ticketCount)
 	{
 		Bundle bundle = new Bundle();
@@ -169,19 +148,6 @@ public class TicketFragment extends Fragment implements IDrawerFragment
 		}
 
 		m_closed = true;
-	}
-
-	@Override
-	public void onDrawerOpened()
-	{
-		getActivity().supportInvalidateOptionsMenu();
-	}
-
-	@Override
-	public void onDrawerClosed()
-	{
-		getActivity().setTitle(R.string.tickets_title);
-		getActivity().supportInvalidateOptionsMenu();
 	}
 
 	private void updateMessage(boolean networkError)

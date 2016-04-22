@@ -46,6 +46,8 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		m_drawerOpen = ((IDrawerActivity) getActivity()).isDrawerOpen();
+
 		View view = inflater.inflate(R.layout.tickets, container, false);
 
 		m_swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
@@ -55,8 +57,8 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			@Override
 			public void onRefresh()
 			{
-
-				m_swipeRefreshLayout.setRefreshing(false);
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(false);
 				refresh();
 			}
 		});
@@ -159,6 +161,10 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	public void onDrawerOpened()
 	{
 		getActivity().supportInvalidateOptionsMenu();
+
+		// hack -- if we swap features while refreshing, the view gets stuck
+		m_drawerOpen = true;
+		m_swipeRefreshLayout.setRefreshing(false);
 	}
 
 	@Override
@@ -166,6 +172,10 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	{
 		getActivity().setTitle(R.string.tickets_title);
 		getActivity().supportInvalidateOptionsMenu();
+
+		m_drawerOpen = false;
+		if (m_updateTicketsTask != null)
+			m_swipeRefreshLayout.setRefreshing(true);
 	}
 
 	private void refresh()
@@ -176,7 +186,8 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			m_updateTicketsTask = null;
 		}
 
-		m_swipeRefreshLayout.setRefreshing(true);
+		if (!m_drawerOpen)
+			m_swipeRefreshLayout.setRefreshing(true);
 
 		m_updateTicketsTask = new AsyncTask<Void, Void, Boolean>()
 		{
@@ -219,8 +230,10 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			{
 				if (!isCancelled() && !m_closed)
 				{
-					m_swipeRefreshLayout.setRefreshing(false);
 					m_updateTicketsTask = null;
+
+					if (!m_drawerOpen)
+						m_swipeRefreshLayout.setRefreshing(false);
 
 					if (result != null && result.booleanValue())
 					{
@@ -326,6 +339,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	}
 
 	private boolean m_closed;
+	private boolean m_drawerOpen;
 	private ViewPager m_ticketsViewPager;
 	private TextView m_messageLink;
 	private TicketsPagerAdapter m_ticketsPagerAdapter;

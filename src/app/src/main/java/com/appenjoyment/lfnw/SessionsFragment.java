@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
 import com.appenjoyment.utility.HashCodeUtility;
 
 public class SessionsFragment extends Fragment implements IDrawerFragment
@@ -41,6 +43,8 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		m_drawerOpen = ((IDrawerActivity) getActivity()).isDrawerOpen();
+
 		View view = inflater.inflate(R.layout.sessions, container, false);
 		setHasOptionsMenu(true);
 
@@ -175,9 +179,9 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	{
 		switch (item.getItemId())
 		{
-		case R.id.menu_refresh:
-			refresh();
-			return true;
+			case R.id.menu_refresh:
+				refresh();
+				return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -189,6 +193,10 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 
 		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
 		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+
+		// hack -- if we swap features while refreshing, the refresh + headers get stuck
+		m_drawerOpen = true;
+		m_swipeRefreshLayout.setRefreshing(false);
 	}
 
 	@Override
@@ -199,6 +207,10 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 
 		ActionBarActivity actionBarActivity = (ActionBarActivity) getActivity();
 		actionBarActivity.getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+		m_drawerOpen = false;
+		if (m_isRefreshing)
+			m_swipeRefreshLayout.setRefreshing(true);
 	}
 
 	private void refresh()
@@ -369,7 +381,9 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		{
 			m_boundUpdateSessionsService = ((UpdateSessionsService.UpdateSessionsBinder) service).getService();
 			m_isRefreshing = m_boundUpdateSessionsService.isUpdating();
-			m_swipeRefreshLayout.setRefreshing(m_isRefreshing);
+
+			if (!m_drawerOpen)
+				m_swipeRefreshLayout.setRefreshing(m_isRefreshing);
 		}
 
 		public void onServiceDisconnected(ComponentName className)
@@ -387,12 +401,16 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 			if (intent.getAction().equals(UpdateSessionsService.UPDATE_STARTED_ACTION))
 			{
 				m_isRefreshing = true;
-				m_swipeRefreshLayout.setRefreshing(true);
+
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(true);
 			}
 			else if (intent.getAction().equals(UpdateSessionsService.UPDATE_COMPLETED_ACTION))
 			{
 				m_isRefreshing = false;
-				m_swipeRefreshLayout.setRefreshing(false);
+
+				if (!m_drawerOpen)
+					m_swipeRefreshLayout.setRefreshing(false);
 			}
 			else if (intent.getAction().equals(SessionsManager.UPDATED_SESSIONS_ACTION))
 			{
@@ -471,4 +489,5 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	private BaseAdapter m_navigationListAdapter;
 	private NavigationOption m_navigationOption;
 	private boolean m_isRefreshing;
+	private boolean m_drawerOpen;
 }
