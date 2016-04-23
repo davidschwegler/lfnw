@@ -22,12 +22,14 @@ import android.widget.Toast;
 
 import com.appenjoyment.lfnw.IDrawerActivity;
 import com.appenjoyment.lfnw.IDrawerFragment;
+import com.appenjoyment.lfnw.OurApp;
 import com.appenjoyment.lfnw.R;
 import com.appenjoyment.lfnw.SwipeRefreshLayoutUtility;
 import com.appenjoyment.lfnw.WebViewActivity;
 import com.appenjoyment.lfnw.accounts.AccountManager;
 import com.appenjoyment.lfnw.signin.SignInActivity;
 import com.appenjoyment.utility.HttpUtility;
+import com.google.android.gms.analytics.HitBuilders;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -120,8 +122,12 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	{
 		super.onResume();
 
-		if (AccountManager.getInstance().isSignedIn() && m_updateTicketsTask == null)
+		boolean isSignedIn = AccountManager.getInstance().isSignedIn();
+		if (isSignedIn && m_updateTicketsTask == null)
 			refresh();
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("Tickets/" + (isSignedIn ? "SignedIn" : "Anonymous"));
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
 	}
 
 	@Override
@@ -260,6 +266,13 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 		{
 			m_ticketsViewPager.setVisibility(View.VISIBLE);
 			m_messageLink.setVisibility(View.GONE);
+
+			if (m_ticketsPagerAdapter.getCount() != 0 && m_updateTicketsTask == null && m_lastSuccessTicketCount != m_ticketsPagerAdapter.getCount())
+			{
+				m_lastSuccessTicketCount = m_ticketsPagerAdapter.getCount();
+				OurApp.getInstance().getDefaultTracker().setScreenName("Tickets/" + m_lastSuccessTicketCount);
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
+			}
 		}
 		else if (!networkError)
 		{
@@ -276,6 +289,13 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 							.putExtra(WebViewActivity.KEY_URL, "https://www.linuxfestnorthwest.org/2016/registration"));
 				}
 			});
+
+			if (m_lastSuccessTicketCount != 0)
+			{
+				m_lastSuccessTicketCount = 0;
+				OurApp.getInstance().getDefaultTracker().setScreenName("Tickets/" + m_lastSuccessTicketCount);
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
+			}
 		}
 		else
 		{
@@ -344,4 +364,5 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 	private TextView m_messageLink;
 	private TicketsPagerAdapter m_ticketsPagerAdapter;
 	private AsyncTask<?, ?, ?> m_updateTicketsTask;
+	private int m_lastSuccessTicketCount;
 }

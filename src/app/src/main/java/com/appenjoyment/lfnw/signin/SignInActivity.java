@@ -16,11 +16,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appenjoyment.lfnw.OurApp;
 import com.appenjoyment.lfnw.R;
 import com.appenjoyment.lfnw.UpdateSessionsService;
 import com.appenjoyment.lfnw.accounts.AccountManager;
 import com.appenjoyment.lfnw.accounts.SignInResponseData;
 import com.appenjoyment.utility.HttpUtility;
+import com.google.android.gms.analytics.HitBuilders;
 
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
@@ -90,6 +92,15 @@ public class SignInActivity extends AppCompatActivity
 	}
 
 	@Override
+	protected void onResume()
+	{
+		super.onResume();
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("SignIn");
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if (item.getItemId() == android.R.id.home)
@@ -127,7 +138,18 @@ public class SignInActivity extends AppCompatActivity
 				{
 					SignInResponseData data = SignInResponseData.parseFromJson(response.result);
 					if (data == null)
+					{
+						OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+								.setCategory("Action")
+								.setAction("SignInDataError")
+								.build());
 						return false;
+					}
+
+					OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+							.setCategory("Action")
+							.setAction("SignInSuccess")
+							.build());
 
 					AccountManager.getInstance().setLogin(data.account, data.user);
 

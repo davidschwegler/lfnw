@@ -3,7 +3,9 @@ package com.appenjoyment.lfnw.accounts;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
 import com.appenjoyment.lfnw.OurApp;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
@@ -25,6 +27,10 @@ public final class AccountManager
 	{
 		CookieManager cookieManager = new CookieManager();
 		CookieHandler.setDefault(cookieManager);
+
+		User user = getUser();
+		if (user != null)
+			OurApp.getInstance().getDefaultTracker().setClientId("" + user.userId);
 
 		Account account = getAccount();
 		if (account != null)
@@ -53,6 +59,8 @@ public final class AccountManager
 		editor.putString("AvatarUrl", user.avatarUrl);
 
 		editor.commit();
+
+		OurApp.getInstance().getDefaultTracker().setClientId("" + user.userId);
 
 		setupCookies(account);
 	}

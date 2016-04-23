@@ -49,6 +49,7 @@ import android.widget.Toast;
 import com.appenjoyment.utility.CsvUtility;
 import com.appenjoyment.utility.HttpUtility;
 import com.appenjoyment.utility.StreamUtility;
+import com.google.android.gms.analytics.HitBuilders;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -94,6 +95,15 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 	}
 
 	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("ScannedBadges");
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
+	}
+
+	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
@@ -127,6 +137,10 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				}
 				break;
 			case R.id.menu_scan_badge_export:
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("Export")
+						.build());
 				exportToCsv();
 				return true;
 		}
@@ -150,6 +164,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 					Log.i(TAG, "Found http uri");
 					if (uri.getSchemeSpecificPart().endsWith(".vcf"))
 					{
+						OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+								.setCategory("Action")
+								.setAction("BadgeScanGotVcfUrl")
+								.build());
+
 						Log.i(TAG, "Found uri to vcf, attempting download");
 						m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(uri).execute();
 						success = true;
@@ -157,6 +176,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				}
 				else
 				{
+					OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+							.setCategory("Action")
+							.setAction("BadgeScanGotVcf")
+							.build());
+
 					Log.i(TAG, "Attempting to insert as VCF data");
 					success = insertRawVcfBadge(contents);
 				}
@@ -366,6 +390,10 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 									{
 										case R.string.scanned_badge_add_to_contacts:
 										{
+											OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+													.setCategory("Action")
+													.setAction("AddContact")
+													.build());
 											Intent intent = BadgeContactIntentUtility.createAddContactIntent(data.contactData);
 
 											boolean success = false;
@@ -387,6 +415,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 										}
 										case R.string.scanned_badge_send_email:
 										{
+											OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+													.setCategory("Action")
+													.setAction("SendEmail")
+													.build());
+
 											Intent intent = new Intent(Intent.ACTION_VIEW);
 											Uri intentData = Uri.parse("mailto:" + data.contactData.email);
 											intent.setData(intentData);
@@ -407,6 +440,11 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 										}
 										case R.string.generic_copy:
 										{
+											OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+													.setCategory("Action")
+													.setAction("Copy")
+													.build());
+
 											StringBuilder text = new StringBuilder(data.contactData.buildFullName());
 											if (!TextUtils.isEmpty(data.contactData.organization))
 											{
@@ -549,8 +587,20 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				m_downloadVcfTask = null;
 
 				boolean inserted = result != null && insertRawVcfBadge(result);
-				if (!inserted)
+				if (inserted)
 				{
+					OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+							.setCategory("Action")
+							.setAction("BadgeScanVcfDownloadSuccess")
+							.build());
+				}
+				else
+				{
+					OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+							.setCategory("Action")
+							.setAction("BadgeScanVcfDownloadFailed")
+							.build());
+
 					new AlertDialog.Builder(getActivity())
 							.setMessage(R.string.scan_badge_download_contact_failed)
 							.setNeutralButton("Cancel", new DialogInterface.OnClickListener()

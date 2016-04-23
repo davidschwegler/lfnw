@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_id": "linuxfest-northwest",
+    "project_number": "134081587611",
+    "name": "LinuxFest Northwest"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134081587611:android:8774cdbe820f65a5",
+        "client_id": "android:com.appenjoyment.lfnw",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.appenjoyment.lfnw",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-76760964-1"
+          }
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

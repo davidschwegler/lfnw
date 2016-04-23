@@ -30,6 +30,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+
 public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawerFragment
 {
 	public static WebViewFragment newInstance(String url, String title)
@@ -176,6 +178,9 @@ public class WebViewFragment extends Fragment implements IHandleKeyDown, IDrawer
 		super.onResume();
 
 		CookieSyncManager.getInstance().startSync();
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("WebView/" + m_title);
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
 	}
 
 	@Override

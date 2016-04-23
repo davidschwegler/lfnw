@@ -22,6 +22,9 @@ dependencies {
     compile 'com.android.support:support-v4:23.3.0'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
+    compile 'com.google.android.gms:play-services-analytics:8.4.0'
     compile 'com.googlecode.ez-vcard:ez-vcard:0.9.9'
     compile 'com.mikhaellopez:circularimageview:3.0.2'
 }
+
+apply plugin: 'com.google.gms.google-services'

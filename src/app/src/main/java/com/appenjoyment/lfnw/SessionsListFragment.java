@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.appenjoyment.utility.HttpUtility;
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersAdapter;
 import com.emilsjolander.components.stickylistheaders.StickyListHeadersListView;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class SessionsListFragment extends Fragment
 {
@@ -119,6 +120,11 @@ public class SessionsListFragment extends Fragment
 						// sync sessions to update after star
 						getActivity().startService(new Intent(getActivity(), UpdateSessionsService.class)
 								.putExtra(UpdateSessionsService.EXTRA_START_KIND, UpdateSessionsService.START_KIND_SYNC));
+
+						OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+								.setCategory("Action")
+								.setAction("StarredSession")
+								.build());
 					}
 
 					cursor.requery();

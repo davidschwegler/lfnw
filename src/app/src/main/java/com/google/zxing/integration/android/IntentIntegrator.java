@@ -35,6 +35,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import com.appenjoyment.lfnw.OurApp;
+import com.google.android.gms.analytics.HitBuilders;
+
 /**
  * <p>
  * A utility class which helps ease integration with Barcode Scanner via {@link Intent}s. This is a simple way to invoke barcode scanning and receive the
@@ -313,6 +316,14 @@ public class IntentIntegrator
 		{
 			return showDownloadDialog();
 		}
+		else
+		{
+			OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+					.setCategory("Action")
+					.setAction("BarCodeScan")
+					.build());
+		}
+
 		intentScan.setPackage(targetAppPackage);
 		intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -360,6 +371,11 @@ public class IntentIntegrator
 
 	private AlertDialog showDownloadDialog()
 	{
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+				.setCategory("Action")
+				.setAction("BarCodeScanAppRequired")
+				.build());
+
 		AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
 		downloadDialog.setTitle(title);
 		downloadDialog.setMessage(message);
@@ -368,6 +384,11 @@ public class IntentIntegrator
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i)
 			{
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("BarCodeScanAppRequiredOk")
+						.build());
+
 				String packageName = targetApplications.get(0);
 				Uri uri = Uri.parse("market://details?id=" + packageName);
 				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -386,6 +407,21 @@ public class IntentIntegrator
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i)
 			{
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("BarCodeScanAppRequiredNegative")
+						.build());
+			}
+		});
+		downloadDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+		{
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("BarCodeScanAppRequiredCancel")
+						.build());
 			}
 		});
 		return downloadDialog.show();

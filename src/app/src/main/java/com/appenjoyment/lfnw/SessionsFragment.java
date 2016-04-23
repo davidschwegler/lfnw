@@ -32,6 +32,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.appenjoyment.utility.HashCodeUtility;
+import com.google.android.gms.analytics.HitBuilders;
 
 public class SessionsFragment extends Fragment implements IDrawerFragment
 {
@@ -137,6 +138,9 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 
 		// TODO: onResume? onCreate?
 		getActivity().bindService(new Intent(getActivity(), UpdateSessionsService.class), m_updateSessionsServiceConnection, Context.BIND_AUTO_CREATE);
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("Sessions");
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
 	}
 
 	@Override

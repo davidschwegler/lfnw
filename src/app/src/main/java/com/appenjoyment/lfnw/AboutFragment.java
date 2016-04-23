@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+
 public class AboutFragment extends Fragment implements IDrawerFragment
 {
 	public static AboutFragment newInstance()
@@ -58,6 +60,11 @@ public class AboutFragment extends Fragment implements IDrawerFragment
 			@Override
 			public void onClick(View v)
 			{
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("Email")
+						.build());
+
 				String subject = getString(R.string.support_email_subject_prefix) + ": " + getString(R.string.app_name) +
 						" " + packageInfoFinal.versionName;
 				String body = "\n\n----\nVersion: " + packageInfoFinal.versionName +
@@ -89,11 +96,24 @@ public class AboutFragment extends Fragment implements IDrawerFragment
 			@Override
 			public void onClick(View v)
 			{
+				OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+						.setCategory("Action")
+						.setAction("GitHub")
+						.build());
 				startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://" + githubUrl)));
 			}
 		});
 
 		return view;
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		OurApp.getInstance().getDefaultTracker().setScreenName("Help");
+		OurApp.getInstance().getDefaultTracker().send(new HitBuilders.ScreenViewBuilder().build());
 	}
 
 	@Override
