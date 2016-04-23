@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -170,7 +168,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 								.build());
 
 						Log.i(TAG, "Found uri to vcf, attempting download");
-						m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(uri).execute();
+						m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(uri, false).execute();
 						success = true;
 					}
 				}
@@ -375,6 +373,10 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 						titleIds.add(R.string.scanned_badge_send_email);
 					titleIds.add(R.string.generic_copy);
 
+					final Uri redownloadUri = !TextUtils.isEmpty(data.contactData.firstName) ? Uri.parse(data.contactData.firstName) : null;
+					if (redownloadUri != null && redownloadUri.getScheme() != null && (redownloadUri.getScheme().equals("http") || redownloadUri.getScheme().equals("https")) && redownloadUri.getSchemeSpecificPart().endsWith(".vcf"))
+						titleIds.add(R.string.scanned_badge_redownload);
+
 					String[] titles = new String[titleIds.size()];
 					for (int index = 0; index < titleIds.size(); index++)
 						titles[index] = getResources().getString(titleIds.get(index).intValue());
@@ -437,6 +439,15 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 											if (!success)
 												Toast.makeText(getActivity(), "Couldn't send email", Toast.LENGTH_SHORT).show();
 											break;
+										}
+										case R.string.scanned_badge_redownload:
+										{
+											OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+													.setCategory("Action")
+													.setAction("Redownload")
+													.build());
+
+											m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(redownloadUri, true).execute();
 										}
 										case R.string.generic_copy:
 										{
@@ -506,9 +517,10 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 
 	private final class DownloadVcfTask extends AsyncTask<Void, Void, String>
 	{
-		public DownloadVcfTask(Uri uri)
+		public DownloadVcfTask(Uri uri, boolean isRedownload)
 		{
 			m_uri = uri;
+			m_isRedownload = isRedownload;
 		}
 
 		@Override
@@ -608,6 +620,9 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 								@Override
 								public void onClick(DialogInterface dialog, int which)
 								{
+									if (m_isRedownload)
+										return;
+
 									Log.i(TAG, "Inserting url to vcf badge");
 									BadgeContactData contact = new BadgeContactData();
 									contact.firstName = m_uri.toString();
@@ -617,7 +632,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 									scannedBadge.dateScanned = new Date().getTime();
 									ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
 
-									Toast.makeText(getActivity(), "Added url of contact's vcard", Toast.LENGTH_SHORT).show();
+									Toast.makeText(getActivity(), "Download this contact later by tapping it", Toast.LENGTH_SHORT).show();
 								}
 							})
 							.setPositiveButton("Retry", new DialogInterface.OnClickListener()
@@ -626,7 +641,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 								public void onClick(DialogInterface dialog, int which)
 								{
 									Log.i(TAG, "Retrying...");
-									m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri).execute();
+									m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri, m_isRedownload).execute();
 								}
 							})
 							.show();
@@ -634,6 +649,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 			}
 		}
 
+		private final boolean m_isRedownload;
 		private final Uri m_uri;
 		private ProgressDialog m_downloadVcfDialog;
 	}
