@@ -29,7 +29,11 @@ public final class OurApp extends Application
 			GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
 
 			if (BuildConfig.DEBUG)
+			{
+				// defaults to 30m, change to 10s for local testing
+				analytics.setLocalDispatchPeriod(10);
 				analytics.setDryRun(true);
+			}
 
 			mTracker = analytics.newTracker(R.xml.global_tracker);
 		}
