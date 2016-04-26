@@ -17,6 +17,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_open_in_browser">Open in browser</string>
     <string name="generic_copy">Copy</string>
+    <string name="generic_later">Later</string>
+    <string name="generic_ok">Ok</string>
+    <string name="generic_retry">Retry</string>
     <string name="scanned_badge_send_email">Send email</string>
     <string name="scanned_badge_add_to_contacts">Add contact</string>
     <string name="scanned_badge_redownload">Retry contact download</string>
@@ -31,7 +34,9 @@
     <string name="scan_badge_title">Scan Badge</string>
     <string name="scan_badge_list_empty">Scan the QR code on a friend\'s badge\nto get their contact info!</string>
     <string name="scan_badge_downloading_contact">Downloading contact card from LinuxFest…</string>
-    <string name="scan_badge_download_contact_failed">Could not download contact card from LinuxFest - check your internet connection.</string>
+    <string name="scan_badge_download_contact_failed">Could not download contact card from LinuxFest - check your internet connection. The link has been saved so you can try again later.</string>
+    <string name="scan_badge_download_contact_parse_failed">Could not read contact card from LinuxFest. The link has been saved so you can try again later.</string>
+    <string name="scan_badge_download_contact_failed_toast">Download this contact later by tapping it.</string>
     <string name="tickets_title">Event Tickets</string>
     <string name="no_sessions">No sessions.</string>
     <string name="menu_scan_badge_export">Export</string>

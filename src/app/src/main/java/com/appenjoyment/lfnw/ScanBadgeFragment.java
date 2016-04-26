@@ -589,7 +589,7 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 		}
 
 		@Override
-		protected void onPostExecute(String result)
+		protected void onPostExecute(final String result)
 		{
 			if (!isCancelled())
 			{
@@ -608,43 +608,63 @@ public class ScanBadgeFragment extends Fragment implements IDrawerFragment
 				}
 				else
 				{
-					OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
-							.setCategory("Action")
-							.setAction("BadgeScanVcfDownloadFailed")
-							.build());
+					// save off the url if we aren't retrying a saved one
+					if (m_isRedownload)
+					{
+						OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+								.setCategory("Action")
+								.setAction("BadgeScanVcfRedownloadFailed")
+								.build());
+					}
+					else
+					{
+						OurApp.getInstance().getDefaultTracker().send(new HitBuilders.EventBuilder()
+								.setCategory("Action")
+								.setAction(result == null ? "BadgeScanVcfDownloadFailed" : "BadgeScanVcfDownloadParseFailed")
+								.build());
 
-					new AlertDialog.Builder(getActivity())
-							.setMessage(R.string.scan_badge_download_contact_failed)
-							.setNeutralButton("Cancel", new DialogInterface.OnClickListener()
-							{
-								@Override
-								public void onClick(DialogInterface dialog, int which)
+						Log.i(TAG, "Inserting url to vcf badge");
+						BadgeContactData contact = new BadgeContactData();
+						contact.firstName = m_uri.toString();
+
+						ScannedBadgeData scannedBadge = new ScannedBadgeData();
+						scannedBadge.contactData = contact;
+						scannedBadge.dateScanned = new Date().getTime();
+						ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
+					}
+
+					// tell the user we failed
+					if (result == null)
+					{
+						new AlertDialog.Builder(getActivity())
+								.setMessage(R.string.scan_badge_download_contact_failed)
+								.setNeutralButton(R.string.generic_later, new DialogInterface.OnClickListener()
 								{
-									if (m_isRedownload)
-										return;
-
-									Log.i(TAG, "Inserting url to vcf badge");
-									BadgeContactData contact = new BadgeContactData();
-									contact.firstName = m_uri.toString();
-
-									ScannedBadgeData scannedBadge = new ScannedBadgeData();
-									scannedBadge.contactData = contact;
-									scannedBadge.dateScanned = new Date().getTime();
-									ScannedBadgesManager.getInstance(getActivity()).insert(scannedBadge);
-
-									Toast.makeText(getActivity(), "Download this contact later by tapping it", Toast.LENGTH_SHORT).show();
-								}
-							})
-							.setPositiveButton("Retry", new DialogInterface.OnClickListener()
-							{
-								@Override
-								public void onClick(DialogInterface dialog, int which)
+									@Override
+									public void onClick(DialogInterface dialog, int which)
+									{
+										Toast.makeText(getActivity(), R.string.scan_badge_download_contact_failed_toast, Toast.LENGTH_SHORT).show();
+									}
+								})
+								.setPositiveButton(R.string.generic_retry, new DialogInterface.OnClickListener()
 								{
-									Log.i(TAG, "Retrying...");
-									m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri, m_isRedownload).execute();
-								}
-							})
-							.show();
+									@Override
+									public void onClick(DialogInterface dialog, int which)
+									{
+										Log.i(TAG, "Retrying...");
+										m_downloadVcfTask = (DownloadVcfTask) new DownloadVcfTask(m_uri, true).execute();
+									}
+								})
+								.show();
+					}
+					else
+					{
+						new AlertDialog.Builder(getActivity())
+								.setMessage(R.string.scan_badge_download_contact_parse_failed)
+								.setPositiveButton(R.string.generic_ok, null)
+								.show();
+					}
+
 				}
 			}
 		}
