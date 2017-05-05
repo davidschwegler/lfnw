@@ -201,7 +201,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 			protected Boolean doInBackground(Void... params)
 			{
 				int userId = AccountManager.getInstance().getUser().userId;
-				String url = "https://www.linuxfestnorthwest.org/user/" + userId + "/tickets.json?entity_id=3835";
+				String url = "https://www.linuxfestnorthwest.org/user/" + userId + "/tickets.json?entity_id=4430";
 
 				Pair<Boolean, String> response = HttpUtility.getStringResponse(url);
 				if (response != null && response.first)
@@ -286,7 +286,7 @@ public class TicketsFragment extends Fragment implements IDrawerFragment
 				{
 					startActivity(new Intent(getActivity(), WebViewActivity.class)
 							.putExtra(WebViewActivity.KEY_TITLE, getString(R.string.register_title))
-							.putExtra(WebViewActivity.KEY_URL, "https://www.linuxfestnorthwest.org/2016/registration"));
+							.putExtra(WebViewActivity.KEY_URL, "https://www.linuxfestnorthwest.org/2017/registration"));
 				}
 			});
 

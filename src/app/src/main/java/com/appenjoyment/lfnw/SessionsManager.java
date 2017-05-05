@@ -1,13 +1,5 @@
 package com.appenjoyment.lfnw;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +12,14 @@ import android.util.Pair;
 
 import com.appenjoyment.utility.ArrayUtility;
 import com.appenjoyment.utility.StreamUtility;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 import ezvcard.util.IOUtils;
 
@@ -373,9 +373,9 @@ public final class SessionsManager
 	// TODO: where would be a better place to do this kind of initialization?
 	private void insertInitialData(SQLiteDatabase db)
 	{
-		Log.i(TAG, "Inserting initial bofs/sessions list");
+		Log.i(TAG, "Inserting initial sessions list");
 
-		insertInitialData(db, "bofs.json", "sessions.json");
+		insertInitialData(db, "sessions.json");
 	}
 
 	private String loadAsset(String assetName)
@@ -397,19 +397,19 @@ public final class SessionsManager
 		}
 	}
 
-	private void insertInitialData(SQLiteDatabase db, String bofsAssetName, String sessionsAssetName)
+	private void insertInitialData(SQLiteDatabase db, String sessionsAssetName)
 	{
-		String bofSessionsJson = loadAsset(bofsAssetName);
-		if (bofSessionsJson != null)
-		{
-			List<SessionData> bofSessionsData = SessionData.parseFromJson(bofSessionsJson);
-			if (bofSessionsData != null)
-			{
-				for (SessionData bofSession : bofSessionsData)
-					bofSession.isBof = true;
-				insertOrUpdate(db, bofSessionsData);
-			}
-		}
+//		String bofSessionsJson = loadAsset(bofsAssetName);
+//		if (bofSessionsJson != null)
+//		{
+//			List<SessionData> bofSessionsData = SessionData.parseFromJson(bofSessionsJson);
+//			if (bofSessionsData != null)
+//			{
+//				for (SessionData bofSession : bofSessionsData)
+//					bofSession.isBof = true;
+//				insertOrUpdate(db, bofSessionsData);
+//			}
+//		}
 
 		String sessionsJson = loadAsset(sessionsAssetName);
 		if (sessionsJson != null)
@@ -431,7 +431,8 @@ public final class SessionsManager
 		// v2: update with embedded 2014 data
 		// v3: update with embedded 2015 data
 		// v4: update with embedded 2016 data, add isBof
-		public static final int DATABASE_VERSION = 4;
+		// v5: update with embedded 2017 data
+		public static final int DATABASE_VERSION = 5;
 		public static final String DATABASE_NAME = "Sessions.db";
 
 		public SessionsDatabase(Context context)
@@ -468,6 +469,7 @@ public final class SessionsManager
 			// v2: update with embedded 2014 data
 			// v3: update with embedded 2015 data
 			// v4: update with embedded 2016 data, add isBof
+			// v5: update with embedded 2017 data
 			if (oldVersion < 4)
 			{
 				// can only add one column per alter table call

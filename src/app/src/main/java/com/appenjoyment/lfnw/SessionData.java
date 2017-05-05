@@ -87,6 +87,24 @@ import android.util.Pair;
  *            }
  *        },
  * </post>
+ *
+ * 2017
+ *
+ * <pre>
+ *  {
+ * 		"node": {
+ * 			"nid": "4550",
+ * 			"title": "Own Your Home: Private IoT devices with resinOS",
+ * 			"name": "G-103",
+ * 			"day": "Sat, 6 May 2017",
+ * 			"time": "9:30 AM to 10:30 AM",
+ * 			"field_speakers": "jack@brownjohnf.com",
+ * 			"field_experience": "Learner",
+ * 			"Track": "Code",
+ * 			"My Schedule": "\/flag\/flag\/session_schedule\/4550?destination=node\/4430\/schedule.json&token=PBzhVapq4hOs976c7UOk7-ke2OXWxYoQMhiZIbjvfc4"
+ *            }
+ *        },
+ * </pre>
  */
 public class SessionData
 {
@@ -262,7 +280,7 @@ public class SessionData
 		}
 		else if (sessionObject.has("Track"))
 		{
-			// alternate for 2016
+			// alternate for 2016, and used in 2017
 			Object trackObject = sessionObject.get("Track");
 			if (trackObject instanceof String)
 				session.track = (String) trackObject;

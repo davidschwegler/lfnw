@@ -30,8 +30,8 @@
             android:id="@+id/ticket_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:minHeight="240dp"
-            android:minWidth="240dp"
+            android:minHeight="160dp"
+            android:minWidth="160dp"
             android:scaleType="fitCenter"/>
 
         <ProgressBar

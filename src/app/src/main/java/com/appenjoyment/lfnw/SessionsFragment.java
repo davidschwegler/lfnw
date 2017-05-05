@@ -225,6 +225,8 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 
 	private NavigationOption loadLastNavigationOption()
 	{
+		clearLastNavigationOptionIfNewAppYear();
+
 		SharedPreferences prefs = getActivity().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 		if (prefs.contains(PREFERENCE_NAVIGATION_OPTION_YEAR) &&
 				prefs.contains(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY) &&
@@ -236,6 +238,21 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 		}
 
 		return null;
+	}
+
+	private void clearLastNavigationOptionIfNewAppYear()
+	{
+		// when we publish 2017's app, we want it to default to show 2017, even if "Starred 2016 sessions" is what they had last
+		SharedPreferences prefs = getActivity().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+		if (!CURRENT_APP_NAVIGATION_YEAR.equals(prefs.getString(PREFERENCE_RESET_NAVIGATION_FOR_CURRENT_YEAR, null)))
+		{
+			prefs.edit()
+					.putString(PREFERENCE_RESET_NAVIGATION_FOR_CURRENT_YEAR, CURRENT_APP_NAVIGATION_YEAR)
+					.remove(PREFERENCE_NAVIGATION_OPTION_YEAR)
+					.remove(PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY)
+					.remove(PREFERENCE_NAVIGATION_OPTION_TITLE)
+					.apply();
+		}
 	}
 
 	private void saveLastNavigationOption()
@@ -480,6 +497,8 @@ public class SessionsFragment extends Fragment implements IDrawerFragment
 	private static final String PREFERENCE_NAVIGATION_OPTION_YEAR = "Year";
 	private static final String PREFERENCE_NAVIGATION_OPTION_STARRED_ONLY = "StarredOnly";
 	private static final String PREFERENCE_NAVIGATION_OPTION_TITLE = "Title";
+	private static final String PREFERENCE_RESET_NAVIGATION_FOR_CURRENT_YEAR = "ResetNavigationForCurrentYear";
+	private static final String CURRENT_APP_NAVIGATION_YEAR = "2017"; // note: don't parse as a date...if needed to bugfix a reset of app navigation, may republish with "2017_2", for example
 
 	private UpdateSessionsService m_boundUpdateSessionsService;
 	private ServiceConnection m_updateSessionsServiceConnection;

@@ -139,31 +139,32 @@ public class UpdateSessionsService extends Service
 			Log.i(TAG, "Starting sessions list update");
 			sendBroadcast(new Intent(UPDATE_STARTED_ACTION));
 
-			Pair<Boolean, String> bofJsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/bofs.json");
-			if (!bofJsonResult.first)
-				return false;
+			// No BOFs for 2017
+////			Pair<Boolean, String> bofJsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2017/bofs.json");
+////			if (!bofJsonResult.first)
+////				return false;
+////
+////			if (isCancelled())
+////				return null;
+////
+////			List<SessionData> bofSessionData = SessionData.parseFromJson(bofJsonResult.second);
+////			if (bofSessionData == null)
+////				return false;
+////
+////			if (isCancelled())
+////				return null;
+//
+//			if (bofSessionData.size() != 0)
+//			{
+//				for (SessionData bofSession : bofSessionData)
+//					bofSession.isBof = true;
+//				SessionsManager.getInstance(UpdateSessionsService.this).insertOrUpdate(bofSessionData);
+//			}
+//
+//			if (isCancelled())
+//				return null;
 
-			if (isCancelled())
-				return null;
-
-			List<SessionData> bofSessionData = SessionData.parseFromJson(bofJsonResult.second);
-			if (bofSessionData == null)
-				return false;
-
-			if (isCancelled())
-				return null;
-
-			if (bofSessionData.size() != 0)
-			{
-				for (SessionData bofSession : bofSessionData)
-					bofSession.isBof = true;
-				SessionsManager.getInstance(UpdateSessionsService.this).insertOrUpdate(bofSessionData);
-			}
-
-			if (isCancelled())
-				return null;
-
-			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2016/schedule.json");
+			Pair<Boolean, String> jsonResult = HttpUtility.getStringResponse("https://www.linuxfestnorthwest.org/2017/schedule.json");
 			if (!jsonResult.first)
 				return false;
 
